@@ -166,7 +166,7 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     return body;
   } /* eslint-enable no-param-reassign */
 
-  function messageExpired(body) {
+  function messageExpired(req, body) {
     //  Return true if message is too old (5 mins or older).
     //  Only check for AWS, not Google Cloud.
     if (!isAWS) return false;
@@ -174,21 +174,27 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     const baseStationTime = parseInt(body.baseStationTime, 10);
     //  Compute time diff in minutes.
     const age = (Date.now() - (baseStationTime * 1000.0)) / (60.0 * 1000);
-    if (age > 5.0) {
-      Object.assign(body, { age });
-      return true;
-    }
-    return false;
+    if (age <= 5.0) return false;
+    //  Reject if age > 5 mins.
+    const device = body.device;
+    const seqNumber = body.seqNumber;
+    const localdatetime = body.localdatetime;
+    const error = new Error(`Rejected old message: ${age.toFixed(1)} mins diff`);
+    scloud.error(req, 'task', { error, device, seqNumber, localdatetime, baseStationTime });
+    return true;
   }
 
   function deviceBlacklisted(req, device) {
     //  Return true if device ID was blacklisted.  Get blacklist from environment DEVICE_BLACKLIST.
-    //  Split the blacklist into an array.
     if (blacklist === null) {
+      //  Split the blacklist into an array.
       blacklist = (process.env.DEVICE_BLACKLIST || '')
         .split(',').map(dev => dev.trim().toUpperCase());  //  e.g. ['4D98A7', '4DA49D'];
     }
-    return blacklist.indexOf(device) >= 0;
+    if (blacklist.indexOf(device) < 0) return false;
+    const error = new Error(`Rejected blacklisted device ID: ${device}`);
+    scloud.error(req, 'task', { error, device });
+    return true;
   }
 
   function task(req, device, body0, msg) {
@@ -202,17 +208,11 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     const rootTraceId = msg.rootTraceId;
     //  Convert the text fields into number and boolean values.
     const body = parseSIGFOXMessage(req, body0);
-    const seqNumber = body.seqNumber;
-    const localdatetime = body.localdatetime;
-    const baseStationTime = body.baseStationTime;
     //  Reject message if device ID is blacklisted.
     if (deviceBlacklisted(req, device)) rejectMessage = true;
     //  Only for AWS: Check whether message is too old. If older than 5 mins, reject. This helps to flush the queue of pending requests.
-    if (!rejectMessage && messageExpired(body)) {
-      rejectMessage = true;
-      const error = new Error(`Rejecting old message: ${body.age.toFixed(1)} mins diff`);
-      scloud.error(req, 'task', { error, device, seqNumber, localdatetime, baseStationTime });
-    }
+    if (!rejectMessage && messageExpired(req, body)) rejectMessage = true;
+
     //  If not rejected, send the Sigfox message to the queues.
     return (rejectMessage
       ? Promise.resolve(null)  //  Pass null to next step if rejected.

@@ -33,6 +33,10 @@ const isProduction = (process.env.NODE_ENV === 'production');  //  True on produ
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Message Processing Code
 
+let blacklist = null;  //  Array of blacklisted devices.
+let metadata = null;  //  All metadata, including blacklisted devices.
+let metadataPromise = null;  //  Promise for getting metadata.
+
 function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, depending on platform.
   //  Wrap the module into a function so that all we defer loading of dependencies,
   //  and ensure that cloud resources are properly disposed. For AWS, wrap() is called after
@@ -179,11 +183,27 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     return false;
   }
 
-  function deviceBlacklisted(device) {
-    //  Return true if device was blacklisted.
-    const blacklist = ['4D98A7', '4DA49D'];  //  TODO
-    if (blacklist.indexOf(device) >= 0) return true;
-    return false;
+  function deviceBlacklisted(req, device) {
+    //  Return true if device ID was blacklisted.  Get blacklist from metadata "sigfox-blacklist".
+    if (!metadata) {
+      if (!metadataPromise) {
+        //  Get authorisation for metadata.
+        metadataPromise = scloud.authorizeMetadata(req)
+          //  Get the project metadata.
+          .then(authClient => scloud.getMetadata(req, authClient))
+          //  Convert the metadata to a JavaScript object.
+          .then(res => scloud.convertMetadata(req, res))
+          .then((res) => { metadata = res; })
+          .catch((error) => scloud.error(req, 'deviceBlacklisted', { error }));  //  Suppress error.
+      }
+      return false;  //  Metadata not ready. Try later.
+    }
+    //  Split the blacklist into an array.
+    if (blacklist === null) {
+      blacklist = (metadata['sigfox-blacklist'] || '')
+        .split(',').map(dev => dev.trim().toUpperCase());  //  e.g. ['4D98A7', '4DA49D'];
+    }
+    return blacklist.indexOf(device) >= 0;
   }
 
   function task(req, device, body0, msg) {
@@ -201,7 +221,7 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     const localdatetime = body.localdatetime;
     const baseStationTime = body.baseStationTime;
     //  Reject message if device ID is blacklisted.
-    if (deviceBlacklisted(device)) rejectMessage = true;
+    if (deviceBlacklisted(req, device)) rejectMessage = true;
     //  Only for AWS: Check whether message is too old. If older than 5 mins, reject. This helps to flush the queue of pending requests.
     if (!rejectMessage && messageExpired(body)) {
       rejectMessage = true;

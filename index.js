@@ -486,7 +486,7 @@ function publishJSON(req, topic, obj0) {
   try {
     if (!topic || !obj0) return Promise.resolve('missing_topic_obj');
     if (errorQueues[topic.name]) {
-      console.log(`skipped ${topic.name}`);
+      //  Don't send to queues that don't exist.
       return Promise.resolve(`skipped ${topic.name}`);
     }
     // eslint-disable-next-line no-param-reassign
@@ -501,7 +501,6 @@ function publishJSON(req, topic, obj0) {
         if (error.message && error.message.toLowerCase().indexOf('resource not found') >= 0) {
           //  Queue does not exist.  Ignore future messages because exceptions are expensive to handle.
           errorQueues[topic.name] = error.message;
-          console.log(`will skip ${topic.name}`);
         }
         return error;
       });

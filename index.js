@@ -205,7 +205,6 @@ function writeLog(req, loggingLog0, flush) {
   //  Execute each log task one tick at a time, so it doesn't take too much resources.
   //  If flush is true, flush all logs without waiting for the tick, i.e. when quitting.
   //  Returns a promise.
-  console.log(`writeLog1 ${taskCount} / ${logTasks.length}`);
   const size = batchSize(flush);
   if (logTasks.length === 0) return Promise.resolve('OK');
   //  If not flushing, wait till we got sufficient records to form a batch.
@@ -223,12 +222,11 @@ function writeLog(req, loggingLog0, flush) {
     batch.push(task(cloud.getLogger()).catch(dumpNullError));
     taskCount += 1;
   }
-  console.log(`writeLog2 ${taskCount} / ${batch.length} / ${logTasks.length}`);
+  // console.log(`writeLog2 ${taskCount} / ${batch.length} / ${logTasks.length}`);
   //  Wait for the batch to finish.
   return Promise.all(batch)
     .then((res) => {
       //  Write the non-null records.
-      console.log(`writeLog3 ${taskCount} / ${batch.length} / ${logTasks.length}`);
       const entries = res.filter(x => (x !== null && x !== undefined));
       if (entries.length === 0) return 'nothing';
       //  Rightfully for Google Cloud we should wait for this promise to complete, but it introduces a 1-second delay.
@@ -238,7 +236,6 @@ function writeLog(req, loggingLog0, flush) {
       return 'OK'; //
     })
     .then(() => {  //  If flushing, don't wait for the tick.
-      console.log(`writeLog4 ${taskCount} / ${batch.length} / ${logTasks.length}`);
       if (flush) {
         //  Continue flushing till empty.
         if (logTasks.length === 0) return 'OK';
@@ -272,8 +269,7 @@ function flushLog(req) {
     .catch(dumpError)
     //  Tell the cloud to close any logging connections.
     .then(() => cloud.shutdown(req))
-    .catch(dumpError)
-    .then(() => console.log('flushLog'));
+    .catch(dumpError);
 }
 
 function getMetadata(para, now, operation) {
@@ -489,7 +485,7 @@ function publishJSON(req, topic, obj0) {
     // eslint-disable-next-line no-param-reassign
     if (obj0.type === null) delete obj0.type;
     const obj = removeNulls(obj0);
-    console.log('publishJSON', topic.name, JSON.stringify(obj, null, 2));
+    // console.log('publishJSON', topic.name, JSON.stringify(obj, null, 2));
     const buf = new Buffer(stringify(obj));
     const size = buf.length;
     return topic.publisher().publish(buf)

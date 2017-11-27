@@ -495,7 +495,8 @@ function publishJSON(req, topic, obj0) {
     // console.log('publishJSON', topic.name, JSON.stringify(obj, null, 2));
     const buf = new Buffer(stringify(obj));
     const size = buf.length;
-    return topic.publisher().publish(buf)
+    // return
+    topic.publisher().publish(buf)
       .catch((error) => { // eslint-disable-next-line no-use-before-define
         console.error('publishJSON', error.message, error.stack, topic.name, size, buf.toString());
         if (error.message && error.message.toLowerCase().indexOf('resource not found') >= 0) {
@@ -504,6 +505,7 @@ function publishJSON(req, topic, obj0) {
         }
         return error;
       });
+    return Promise.resolve('pending'); //
   } catch (error) {
     console.error('publishJSON', error.message, error.stack);
     return Promise.resolve('OK');

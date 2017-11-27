@@ -1,13 +1,14 @@
-//  Google Cloud Function sigfoxCallback is exposed as a HTTPS service
+//  region Introduction
+//  Cloud Function sigfoxCallback is exposed as a HTTPS service
 //  that Sigfox Cloud will callback when delivering a Sigfox message.
-//  We insert the Sigfox message into Google PubSub message queues:
+//  For AWS: We insert the Sigfox message into the message queue sigfox.received
+//  For Google Cloud: We insert the Sigfox message into these message queues:
 //  (1) sigfox.devices.all (the queue for all devices)
 //  (2) sigfox.devices.<deviceID> (the device specific queue)
 //  (3) sigfox.types.<deviceType> (the specific device type e.g. gps)
 
 //  We will return the HTTPS response immediately to Sigfox Cloud while
 //  the processing of the Sigfox continues with other Google Cloud Functions.
-
 //  This code is critical, all changes must be reviewed.  It must be
 //  kept as simple as possible to reduce the chance of failure.
 

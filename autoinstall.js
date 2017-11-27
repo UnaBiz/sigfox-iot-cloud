@@ -10,6 +10,9 @@
 //  be faster because AWS reuses the dependencies until it spawns another Lambda instance.
 //  Sample usage: https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/test/test-autoinstall.js
 
+const sigfoxAWSVersion = '2.0.1';  //  Version of sigfox-aws to include.
+
+//  Show a message in case of errors.
 process.on('uncaughtException', err => console.error('uncaughtException', err.message, err.stack));  //  Display uncaught exceptions.
 process.on('unhandledRejection', (reason, p) => console.error('unhandledRejection', reason, p));  //  Display uncaught promises.
 
@@ -52,7 +55,7 @@ function install(package_json, event, context, callback, sourceCode) {
   if (!packageObj.dependencies) packageObj = { dependencies: packageObj };
   //  Include the right version of sigfox-aws.
   if (!packageObj.dependencies['sigfox-aws']) {
-    packageObj.dependencies['sigfox-aws'] = '>=2.0.0';
+    packageObj.dependencies['sigfox-aws'] = `>=${sigfoxAWSVersion}`;
   }
   //  Write the provided package.json and call "npm install".
   fs.writeFileSync(installedPackageFilename, JSON.stringify(packageObj, null, 2));

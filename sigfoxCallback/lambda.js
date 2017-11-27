@@ -24,13 +24,6 @@ const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 ; /* eslint-enable quote-props,quotes,comma-dangle,indent */
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region Declarations: Helper constants to detect if we are running on Google Cloud or AWS.
-//  Don't use any require() in this section because AutoInstall has not loaded our dependencies yet.
-const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE; // eslint-disable-next-line no-unused-vars
-const isAWS = !!process.env.AWS_LAMBDA_FUNCTION_NAME; // eslint-disable-next-line no-unused-vars
-const isProduction = (process.env.NODE_ENV === 'production');  //  True on production server.
-
-//  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Message Processing Code
 
 function wrap(/* scloud */) {  //  scloud will be either sigfox-gcloud or sigfox-aws, depending on platform.
@@ -48,7 +41,7 @@ function wrap(/* scloud */) {  //  scloud will be either sigfox-gcloud or sigfox
 //  region Standard Code for AutoInstall Startup Function.  Do not modify.  https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/autoinstall.js
 /* eslint-disable camelcase,no-unused-vars,import/no-absolute-path,import/no-unresolved,no-use-before-define,global-require,max-len,no-tabs,brace-style,import/no-extraneous-dependencies */
 const wrapper = {};  //  The single reused wrapper instance (initially empty) for invoking the module functions.
-exports.main = isGoogleCloud ? require('sigfox-gcloud/main').getMainFunction(wrapper, wrap, package_json)
+exports.main = process.env.FUNCTION_NAME ? require('sigfox-gcloud/main').getMainFunction(wrapper, wrap, package_json)  //  Google Cloud.
   : (event, context, callback) => { //  exports.main is the startup function for AWS Lambda and Google Cloud Function.
     //  When AWS starts our Lambda function, we load the autoinstall script from GitHub to install any NPM dependencies.
     //  For first run, install the dependencies specified in package_json and proceed to next step.

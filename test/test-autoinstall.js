@@ -50,7 +50,7 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
 //  region Standard Code for AutoInstall Startup Function.  Do not modify.  https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/autoinstall.js
 /* eslint-disable camelcase,no-unused-vars,import/no-absolute-path,import/no-unresolved,no-use-before-define,global-require,max-len,no-tabs,brace-style,import/no-extraneous-dependencies */
 const wrapper = {};  //  The single reused wrapper instance (initially empty) for invoking the module functions.
-exports.main = isGoogleCloud ? require('sigfox-gcloud/main').getMainFunction(wrapper, wrap, package_json)
+exports.main = process.env.FUNCTION_NAME ? require('sigfox-gcloud/main').getMainFunction(wrapper, wrap, package_json)  //  Google Cloud.
   : (event, context, callback) => { //  exports.main is the startup function for AWS Lambda and Google Cloud Function.
     //  When AWS starts our Lambda function, we load the autoinstall script from GitHub to install any NPM dependencies.
     //  For first run, install the dependencies specified in package_json and proceed to next step.

@@ -53,19 +53,21 @@ function installDependencies(package_json, event, context, callback, sourceCode)
   //  If the package.json passed in doesn't contain "dependencies", wrap it as "dependencies".
   let packageObj = package_json || {};
   if (!packageObj.dependencies) packageObj = { dependencies: packageObj };
+  //  Include the right version of sigfox-aws.
+  let dependency = sigfoxAWSDependency;
+  let version = sigfoxAWSVersion;
   if (process.env.AUTOINSTALL_DEPENDENCY) {
-    //  If environment contains AUTOINSTALL_DEPENDENCY and AUTOINSTALL_VERSION, add to the dependencies.
+    //  If environment contains AUTOINSTALL_DEPENDENCY and AUTOINSTALL_VERSION, use that in dependencies instead.
     //  e.g. AUTOINSTALL_DEPENDENCY= sigfox-aws-data / AUTOINSTALL_VERSION= >=0.0.11
-    const dependency = process.env.AUTOINSTALL_DEPENDENCY.trim();
+    dependency = process.env.AUTOINSTALL_DEPENDENCY.trim();
+    //  If dependency contains "/" like "sigfox-iot-cloud/sigfoxCallback", take the first part.
+    dependency = dependency.split('/', 2)[0];
     //  If version is missing, assume latest.
-    const version = (process.env.AUTOINSTALL_VERSION || 'latest').trim();
-    console.log(`Added dependency ${dependency} version ${version}`);
-    packageObj.dependencies[dependency] = version;
-  } else if (!packageObj.dependencies[sigfoxAWSDependency]) {
-    //  Else include the right version of sigfox-aws.
-    packageObj.dependencies[sigfoxAWSDependency] = sigfoxAWSVersion;
-    console.log(`Added dependency ${sigfoxAWSDependency} version ${sigfoxAWSVersion}`);
+    version = (process.env.AUTOINSTALL_VERSION || 'latest').trim();
   }
+  console.log(`Added dependency ${dependency} version ${version}`);
+  packageObj.dependencies[dependency] = version;
+
   //  Add description, repository, license if missing.  NPM will complain if missing.
   packageObj = Object.assign({
     description: '(missing)',

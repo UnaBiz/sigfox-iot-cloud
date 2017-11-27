@@ -6,7 +6,6 @@
 const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 //  PASTE PACKAGE.JSON BELOW  //////////////////////////////////////////////////////////
 {
-  "dnscache": "^1.0.1",
   "uuid": "^3.1.0"
 }
 //  PASTE PACKAGE.JSON ABOVE  //////////////////////////////////////////////////////////

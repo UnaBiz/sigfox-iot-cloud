@@ -1,4 +1,5 @@
-//  Test to verify that AutoInstall can install dependencies and run a wrapper
+//  Test to verify that AutoInstall can install dependencies and run a wrapper.
+//  For AWS: Copy the entire source code and paste into a Lambda function.
 
 /* eslint-disable camelcase,max-len,global-require,import/no-unresolved,no-nested-ternary */
 //  //////////////////////////////////////////////////////////////////////////////////// endregion

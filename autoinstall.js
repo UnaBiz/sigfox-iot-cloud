@@ -57,6 +57,15 @@ function install(package_json, event, context, callback, sourceCode) {
   if (!packageObj.dependencies['sigfox-aws']) {
     packageObj.dependencies['sigfox-aws'] = `>=${sigfoxAWSVersion}`;
   }
+  //  Add description, repository, license if missing.  NPM will complain if missing.
+  packageObj = Object.assign({
+    description: '(missing)',
+    license: 'MIT',
+    repository: {
+      type: 'git',
+      url: 'git+https://github.com/UnaBiz/sigfox-iot-cloud.git',
+    },
+  }, packageObj);
   //  Write the provided package.json and call "npm install".
   fs.writeFileSync(installedPackageFilename, JSON.stringify(packageObj, null, 2));
   const cmd = `export HOME=${tmp}; cd ${tmp}; ls -l; npm install; ls -l; ls -l node_modules; `;

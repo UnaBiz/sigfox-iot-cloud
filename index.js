@@ -4,7 +4,7 @@
 
 //  region Declarations
 //  Helper constants to detect if we are running on Google Cloud or AWS.
-const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE;
+//  const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE;
 const isAWS = !!process.env.AWS_LAMBDA_FUNCTION_NAME;
 const isProduction = (process.env.NODE_ENV === 'production');  //  True on production server.
 
@@ -760,7 +760,7 @@ function main(event, task) {
 
 module.exports = (cloud0) => {
   //  Return the common interface that works for Google Cloud and AWS.
-  //  Save the instance of sigfox-gcloud or sigfox-aws passed in.
+  //  Save the instance of sigfox-gcloud or sigfox-aws passed in. We expose the cloud-specific functions from the instance.
   if (cloud0) cloud = cloud0;
   return {
     isGoogleCloud: cloud.isGoogleCloud,

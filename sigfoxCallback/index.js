@@ -1,12 +1,12 @@
 /* eslint-disable max-len, camelcase, no-console, no-nested-ternary, import/no-dynamic-require, import/newline-after-import, import/no-unresolved, global-require, max-len */
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region AWS AutoInstall: List all dependencies here, or just paste the contents of package.json. Autoinstall will install these dependencies.
+//  region AutoInstall: List all dependencies here, or just paste the contents of package.json. AutoInstall will install these dependencies before calling wrap().
 const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 //  PASTE PACKAGE.JSON BELOW  //////////////////////////////////////////////////////////
-{ "dependencies": {
-  "dnscache": "^1.0.1",
-  "sigfox-aws": ">=1.0.10",
-  "uuid": "^3.1.0" } }
+    {
+      "dnscache": "^1.0.1",
+      "uuid": "^3.1.0"
+    }
 //  PASTE PACKAGE.JSON ABOVE  //////////////////////////////////////////////////////////
 ; /* eslint-enable quote-props,quotes,comma-dangle,indent */
 
@@ -24,9 +24,7 @@ const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 //  kept as simple as possible to reduce the chance of failure.
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region Common Declarations
-
-//  Helper constants to detect if we are running on Google Cloud or AWS.
+//  region Common Declarations: Helper constants to detect if we are running on Google Cloud or AWS.
 const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE;
 const isAWS = !!process.env.AWS_LAMBDA_FUNCTION_NAME; // eslint-disable-next-line no-unused-vars
 const isProduction = (process.env.NODE_ENV === 'production');  //  True on production server.
@@ -34,6 +32,7 @@ const isProduction = (process.env.NODE_ENV === 'production');  //  True on produ
 process.on('uncaughtException', err => console.error('uncaughtException', err.message, err.stack));  //  Display uncaught exceptions.
 process.on('unhandledRejection', (reason, p) => console.error('unhandledRejection', reason, p));
 if (isGoogleCloud) {  //  Start agents for Google Cloud.
+  // eslint-disable-next-line import/no-extraneous-dependencies
   if (!process.env.DISABLE_DNSCACHE) require('dnscache')({ enable: true });  //  Enable DNS cache in case we hit the DNS quota for Google Cloud Functions.
   if (!process.env.DISABLE_TRACE) require('@google-cloud/trace-agent').start();  //  Must enable Google Cloud Tracing before other require()
   if (!process.env.DISABLE_DEBUG) require('@google-cloud/debug-agent').start();  //  Must enable Google Cloud Debug before other require()
@@ -42,15 +41,12 @@ if (isGoogleCloud) {  //  Start agents for Google Cloud.
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Message Processing Code
 
-function wrap(/* package_json */) {
+function wrap(scloud) {  //  scloud will be is either sigfox-gcloud or sigfox-aws, depending on platform.
   //  Wrap the module into a function so that all we defer loading of dependencies,
-  //  and ensure that cloud resources are properly disposed.
-  const scloud = // eslint-disable-next-line import/no-extraneous-dependencies
-    isGoogleCloud ? require('sigfox-gcloud') :  //  sigfox-gcloud Framework
-    isAWS ? require('sigfox-aws') :  //  sigfox-aws Framework
-    null;
+  //  and ensure that cloud resources are properly disposed. For AWS, wrap() is called after
+  //  all dependencies have been loaded.
+  let wrapCount = 0; //  Count how many times the wrapper was reused.
   const uuid = require('uuid');
-  let wrapCount = 0;
 
   function getResponse(req, device0, body /* , msg */) {
     //  Compose the callback response to Sigfox Cloud and return as a promise.
@@ -288,7 +284,7 @@ function wrap(/* package_json */) {
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Standard Code for AutoInstall Startup Function.  Do not modify.  https://github.com/UnaBiz/sigfox-aws/blob/master/autoinstall.js
-/* eslint-disable camelcase,no-unused-vars,import/no-absolute-path,import/no-unresolved,no-use-before-define,global-require,max-len,no-tabs,brace-style */
+/* eslint-disable camelcase,no-unused-vars,import/no-absolute-path,import/no-unresolved,no-use-before-define,global-require,max-len,no-tabs,brace-style,import/no-extraneous-dependencies */
 const wrapper = {};  //  The single reused wrapper instance (initially empty) for invoking the module functions.
 exports.main = isGoogleCloud ? require('sigfox-gcloud/lib/main').getMainFunction(wrapper, wrap, package_json)
   : (event, context, callback) => { //  exports.main is the startup function for AWS Lambda and Google Cloud Function.
@@ -299,7 +295,7 @@ exports.main = isGoogleCloud ? require('sigfox-gcloud/lib/main').getMainFunction
       : require('/tmp/autoinstall').installAndRunWrapper(event, context, callback,
         package_json, __filename, wrapper, wrap);
     if (require('fs').existsSync('/tmp/autoinstall.js')) return afterExec(null);  //  Already downloaded.
-    const cmd = 'curl -s -S -o /tmp/autoinstall.js https://raw.githubusercontent.com/UnaBiz/sigfox-aws/master/autoinstall.js';
+    const cmd = 'curl -s -S -o /tmp/autoinstall.js https://raw.githubusercontent.com/UnaBiz/sigfox-iot-cloud/master/autoinstall.js';
     const child = require('child_process').exec(cmd, { maxBuffer: 1024 * 500 }, afterExec);
     child.stdout.on('data', console.log); child.stderr.on('data', console.error); return null; };
 //  //////////////////////////////////////////////////////////////////////////////////// endregion

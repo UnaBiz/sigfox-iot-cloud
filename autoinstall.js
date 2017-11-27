@@ -10,7 +10,7 @@
 //  be faster because AWS reuses the dependencies until it spawns another Lambda instance.
 //  Sample usage: https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/test/test-autoinstall.js
 
-const sigfoxAWSVersion = '2.0.2';  //  Version of sigfox-aws to include.
+const sigfoxAWSVersion = '2.0.4';  //  Version of sigfox-aws to include.
 
 //  Show a message in case of errors.
 process.on('uncaughtException', err => console.error('uncaughtException', err.message, err.stack));  //  Display uncaught exceptions.

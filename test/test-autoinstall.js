@@ -1,5 +1,6 @@
-/* eslint-disable camelcase,max-len,global-require,import/no-unresolved,no-nested-ternary */
+//  Test to verify that AutoInstall can install dependencies and run a wrapper
 
+/* eslint-disable camelcase,max-len,global-require,import/no-unresolved,no-nested-ternary */
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region AutoInstall: List all dependencies here, or just paste the contents of package.json. AutoInstall will install these dependencies before calling wrap().
 const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
@@ -12,7 +13,7 @@ const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 ; /* eslint-enable quote-props,quotes,comma-dangle,indent */
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region Common Declarations: Helper constants to detect if we are running on Google Cloud or AWS.
+//  region Declarations: Helper constants to detect if we are running on Google Cloud or AWS.
 const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE; // eslint-disable-next-line no-unused-vars
 const isAWS = !!process.env.AWS_LAMBDA_FUNCTION_NAME; // eslint-disable-next-line no-unused-vars
 const isProduction = (process.env.NODE_ENV === 'production');  //  True on production server.

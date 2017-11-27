@@ -1,15 +1,3 @@
-/* eslint-disable max-len, camelcase, no-console, no-nested-ternary, import/no-dynamic-require, import/newline-after-import, import/no-unresolved, global-require, max-len */
-//  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region AutoInstall: List all dependencies here, or just paste the contents of package.json. AutoInstall will install these dependencies before calling wrap().
-const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
-//  PASTE PACKAGE.JSON BELOW  //////////////////////////////////////////////////////////
-    {
-      "dnscache": "^1.0.1",
-      "uuid": "^3.1.0"
-    }
-//  PASTE PACKAGE.JSON ABOVE  //////////////////////////////////////////////////////////
-; /* eslint-enable quote-props,quotes,comma-dangle,indent */
-
 //  Google Cloud Function sigfoxCallback is exposed as a HTTPS service
 //  that Sigfox Cloud will callback when delivering a Sigfox message.
 //  We insert the Sigfox message into Google PubSub message queues:
@@ -23,20 +11,23 @@ const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 //  This code is critical, all changes must be reviewed.  It must be
 //  kept as simple as possible to reduce the chance of failure.
 
+/* eslint-disable max-len, camelcase, no-console, no-nested-ternary, import/no-dynamic-require, import/newline-after-import, import/no-unresolved, global-require, max-len */
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region Common Declarations: Helper constants to detect if we are running on Google Cloud or AWS.
-const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE;
+//  region AutoInstall: List all dependencies here, or just paste the contents of package.json. AutoInstall will install these dependencies before calling wrap().
+const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
+//  PASTE PACKAGE.JSON BELOW  //////////////////////////////////////////////////////////
+{
+  "dnscache": "^1.0.1",
+  "uuid": "^3.1.0"
+}
+//  PASTE PACKAGE.JSON ABOVE  //////////////////////////////////////////////////////////
+; /* eslint-enable quote-props,quotes,comma-dangle,indent */
+
+//  //////////////////////////////////////////////////////////////////////////////////// endregion
+//  region Declarations: Helper constants to detect if we are running on Google Cloud or AWS.
+const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE; // eslint-disable-next-line no-unused-vars
 const isAWS = !!process.env.AWS_LAMBDA_FUNCTION_NAME; // eslint-disable-next-line no-unused-vars
 const isProduction = (process.env.NODE_ENV === 'production');  //  True on production server.
-
-process.on('uncaughtException', err => console.error('uncaughtException', err.message, err.stack));  //  Display uncaught exceptions.
-process.on('unhandledRejection', (reason, p) => console.error('unhandledRejection', reason, p));
-if (isGoogleCloud) {  //  Start agents for Google Cloud.
-  // eslint-disable-next-line import/no-extraneous-dependencies
-  if (!process.env.DISABLE_DNSCACHE) require('dnscache')({ enable: true });  //  Enable DNS cache in case we hit the DNS quota for Google Cloud Functions.
-  if (!process.env.DISABLE_TRACE) require('@google-cloud/trace-agent').start();  //  Must enable Google Cloud Tracing before other require()
-  if (!process.env.DISABLE_DEBUG) require('@google-cloud/debug-agent').start();  //  Must enable Google Cloud Debug before other require()
-}
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Message Processing Code
@@ -283,7 +274,7 @@ function wrap(scloud) {  //  scloud will be is either sigfox-gcloud or sigfox-aw
 }
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region Standard Code for AutoInstall Startup Function.  Do not modify.  https://github.com/UnaBiz/sigfox-aws/blob/master/autoinstall.js
+//  region Standard Code for AutoInstall Startup Function.  Do not modify.  https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/autoinstall.js
 /* eslint-disable camelcase,no-unused-vars,import/no-absolute-path,import/no-unresolved,no-use-before-define,global-require,max-len,no-tabs,brace-style,import/no-extraneous-dependencies */
 const wrapper = {};  //  The single reused wrapper instance (initially empty) for invoking the module functions.
 exports.main = isGoogleCloud ? require('sigfox-gcloud/lib/main').getMainFunction(wrapper, wrap, package_json)

@@ -10,20 +10,26 @@
 //  be faster because AWS reuses the dependencies until it spawns another Lambda instance.
 //  Sample usage: https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/test/test-autoinstall.js
 
-const sigfoxAWSVersion = '2.0.4';  //  Version of sigfox-aws to include.
+const sigfoxAWSDependency = 'sigfox-aws';  //  Name of sigfox-aws dependency.
+const sigfoxAWSVersion = 'latest';  //  Version of sigfox-aws to include.
+const tmp = '/tmp';  //  Relocate code here.
+const sourceFilename = 'index.js';  //  Lambda source code will be written to this filename.
+const packageFilename = 'package.json';  //  Package.json will be written to this filename.
+const installedSourceFilename = `${tmp}/${sourceFilename}`;
+const installedPackageFilename = `${tmp}/${packageFilename}`;
+
+//  Show an error if AUTOINSTALL_DEPENDENCY is defined and not AUTOINSTALL_VERSION. And vice versa.
+/* if (process.env.AUTOINSTALL_DEPENDENCY || process.env.AUTOINSTALL_VERSION) {
+  if (!process.env.AUTOINSTALL_DEPENDENCY) throw new Error('AUTOINSTALL_DEPENDENCY must be set in the environment if AUTOINSTALL_VERSION is set');
+  if (!process.env.AUTOINSTALL_VERSION) throw new Error('AUTOINSTALL_VERSION must be set in the environment if AUTOINSTALL_DEPENDENCY is set');
+} */
 
 //  Show a message in case of errors.
 process.on('uncaughtException', err => console.error('uncaughtException', err.message, err.stack));  //  Display uncaught exceptions.
 process.on('unhandledRejection', (reason, p) => console.error('unhandledRejection', reason, p));  //  Display uncaught promises.
 
-const exec = require('child_process').exec;
 const fs = require('fs');
-
-const tmp = '/tmp';  //  Relocate code here.
-const sourceFilename = 'index.js';
-const packageFilename = 'package.json';
-const installedSourceFilename = `${tmp}/${sourceFilename}`;
-const installedPackageFilename = `${tmp}/${packageFilename}`;
+const exec = require('child_process').exec;
 
 function reloadLambda(event, context, callback) {
   //  Load the relocated Lambda Function at /tmp/index.js and call it.
@@ -38,7 +44,7 @@ function reloadLambda(event, context, callback) {
   throw new Error('Handler not found - should be named "handler" or "main"');
 }
 
-function install(package_json, event, context, callback, sourceCode) {
+function installDependencies(package_json, event, context, callback, sourceCode) {
   //  Copy the specified source code to /tmp/index.js. Write package_json to /tmp/package.json.
   //  Then run "npm install" to install dependencies from package.json.
   //  Finally reload /tmp/index.js and continue execution from the handler.
@@ -51,11 +57,20 @@ function install(package_json, event, context, callback, sourceCode) {
     return reloadLambda(event, context, callback);
   }
   //  If the package.json passed in doesn't contain "dependencies", wrap it as "dependencies".
-  let packageObj = package_json;
+  let packageObj = package_json || {};
   if (!packageObj.dependencies) packageObj = { dependencies: packageObj };
-  //  Include the right version of sigfox-aws.
-  if (!packageObj.dependencies['sigfox-aws']) {
-    packageObj.dependencies['sigfox-aws'] = `>=${sigfoxAWSVersion}`;
+  if (process.env.AUTOINSTALL_DEPENDENCY) {
+    //  If environment contains AUTOINSTALL_DEPENDENCY and AUTOINSTALL_VERSION, add to the dependencies.
+    //  e.g. AUTOINSTALL_DEPENDENCY= sigfox-aws-data / AUTOINSTALL_VERSION= >=0.0.11
+    const dependency = process.env.AUTOINSTALL_DEPENDENCY.trim();
+    //  If version is missing, assume latest.
+    const version = (process.env.AUTOINSTALL_VERSION || 'latest').trim();
+    console.log(`Added dependency ${dependency} version ${version}`);
+    packageObj.dependencies[dependency] = version;
+  } else if (!packageObj.dependencies[sigfoxAWSDependency]) {
+    //  Else include the right version of sigfox-aws.
+    packageObj.dependencies[sigfoxAWSDependency] = sigfoxAWSVersion;
+    console.log(`Added dependency ${sigfoxAWSDependency} version ${sigfoxAWSVersion}`);
   }
   //  Add description, repository, license if missing.  NPM will complain if missing.
   packageObj = Object.assign({
@@ -68,7 +83,14 @@ function install(package_json, event, context, callback, sourceCode) {
   }, packageObj);
   //  Write the provided package.json and call "npm install".
   fs.writeFileSync(installedPackageFilename, JSON.stringify(packageObj, null, 2));
-  const cmd = `export HOME=${tmp}; cd ${tmp}; ls -l; npm install; ls -l; ls -l node_modules; `;
+  const cmd = [
+    `export HOME=${tmp}`,
+    `cd ${tmp}`,
+    `echo "Before install - ${tmp}:"; ls -l`,
+    'npm install',
+    `echo "After install - ${tmp}:"; ls -l`,
+    `echo "After install - ${tmp}/node_modules:"; ls -l node_modules`,
+  ].join('; ');
   const child = exec(cmd, { maxBuffer: 1024 * 500 }, (error) => {
     //  NPM command failed.
     if (error) return callback(error, 'AutoInstall Failed');
@@ -85,13 +107,20 @@ function install(package_json, event, context, callback, sourceCode) {
 }
 
 function installAndRunWrapper(event, context, callback, package_json, sourceFile,
-  wrapVar, wrapFunc) { /* eslint-disable no-param-reassign */
+  wrapVar, wrapFunc0) { /* eslint-disable no-param-reassign */
   //  Copy the specified Lambda function source file to /tmp/index.js.
   //  Write package_json to /tmp/package.json.
   //  Then run "npm install" to install dependencies from package.json.
   //  Then reload /tmp/index.js, create an instance of the wrap()
   //  function, save into wrapVar and call wrap().main(event, context, callback)
-
+  let wrapFunc = wrapFunc0;
+  if (!wrapFunc) {
+    //  If wrap function is missing, set
+    //  wrap = () => require(AUTOINSTALL_DEPENDENCY)
+    const dependency = (process.env.AUTOINSTALL_DEPENDENCY || '').trim();
+    if (dependency.length === 0) throw new Error('wrap function is missing');
+    wrapFunc = () => require(dependency);
+  }
   //  Preserve the wrapper in the context so it won't be changed during reload.
   //  if (!context.wrapVar) context.wrapVar = wrapVar;
   //  Check whether dependencies are installed.
@@ -102,13 +131,13 @@ function installAndRunWrapper(event, context, callback, package_json, sourceFile
     const sourceCode = fs.readFileSync(sourceFile);
     //  Install the dependencies in package_json and re-run the
     //  Lambda function after relocating to /tmp/index.js.
-    return install(package_json, event, context, callback, sourceCode);
+    return installDependencies(package_json, event, context, callback, sourceCode);
   }
   //  We have been reloaded with dependencies installed.
   if (!wrapVar.main) {
     //  If wrapper not created yet, create it with the wrap function.
-    console.log('Creating instance of wrap function...', __filename); //  eslint-disable-next-line no-param-reassign
-    const scloud = require('sigfox-aws');
+    console.log(`Creating instance of wrap function from ${__filename}...`); //  eslint-disable-next-line no-param-reassign
+    const scloud = require(sigfoxAWSDependency);
     Object.assign(wrapVar, wrapFunc(scloud, package_json));
   }
   //  Run the wrapper, setting "this" to the wrap instance.

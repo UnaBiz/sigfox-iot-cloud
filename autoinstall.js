@@ -8,6 +8,7 @@
 //  but it's easier to maintain and faster to prototype.  The first call
 //  is slower because it loads the dependencies, but subsequent calls will
 //  be faster because AWS reuses the dependencies until it spawns another Lambda instance.
+//  Sample usage: https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/test/test-autoinstall.js
 
 process.on('uncaughtException', err => console.error('uncaughtException', err.message, err.stack));  //  Display uncaught exceptions.
 process.on('unhandledRejection', (reason, p) => console.error('unhandledRejection', reason, p));  //  Display uncaught promises.

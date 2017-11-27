@@ -179,6 +179,13 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     return false;
   }
 
+  function deviceBlacklisted(device) {
+    //  Return true if device was blacklisted.
+    const blacklist = ['4D98A7', '4DA49D'];  //  TODO
+    if (blacklist.indexOf(device) >= 0) return true;
+    return false;
+  }
+
   function task(req, device, body0, msg) {
     //  Parse the Sigfox fields and send to the queues for device ID and device type.
     //  Then send the HTTP response back to Sigfox cloud.  If there is downlink data, wait for the response.
@@ -193,8 +200,10 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     const seqNumber = body.seqNumber;
     const localdatetime = body.localdatetime;
     const baseStationTime = body.baseStationTime;
+    //  Reject message if device ID is blacklisted.
+    if (deviceBlacklisted(device)) rejectMessage = true;
     //  Only for AWS: Check whether message is too old. If older than 5 mins, reject. This helps to flush the queue of pending requests.
-    if (messageExpired(body)) {
+    if (!rejectMessage && messageExpired(body)) {
       rejectMessage = true;
       const error = new Error(`Rejecting old message: ${body.age.toFixed(1)} mins diff`);
       scloud.error(req, 'task', { error, device, seqNumber, localdatetime, baseStationTime });

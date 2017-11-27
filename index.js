@@ -454,6 +454,9 @@ let customTransformRoute = null;
 //  logQueue will log to the queues according to this array of { projectId, topicName }
 let logQueueConfig = [];
 
+//  Map of topic names that generated 'resource not found' errors and should not be sent.
+const errorQueues = {};
+
 function setLogQueue(config) {
   //  logQueue will log to the queues according to config, an array of { projectId, topicName }
   logQueueConfig = config || [];
@@ -482,6 +485,10 @@ function publishJSON(req, topic, obj0) {
   //  Returns a promise.
   try {
     if (!topic || !obj0) return Promise.resolve('missing_topic_obj');
+    if (errorQueues[topic.name]) {
+      console.log(`skipped ${topic.name}`);
+      return Promise.resolve(`skipped ${topic.name}`);
+    }
     // eslint-disable-next-line no-param-reassign
     if (obj0.type === null) delete obj0.type;
     const obj = removeNulls(obj0);
@@ -491,6 +498,11 @@ function publishJSON(req, topic, obj0) {
     return topic.publisher().publish(buf)
       .catch((error) => { // eslint-disable-next-line no-use-before-define
         console.error('publishJSON', error.message, error.stack, topic.name, size, buf.toString());
+        if (error.message && error.message.toLowerCase().indexOf('resource not found') >= 0) {
+          //  Queue does not exist.  Ignore future messages because exceptions are expensive to handle.
+          errorQueues[topic.name] = error.message;
+          console.log(`will skip ${topic.name}`);
+        }
         return error;
       });
   } catch (error) {

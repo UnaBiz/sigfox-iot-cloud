@@ -18,12 +18,6 @@ const packageFilename = 'package.json';  //  Package.json will be written to thi
 const installedSourceFilename = `${tmp}/${sourceFilename}`;
 const installedPackageFilename = `${tmp}/${packageFilename}`;
 
-//  Show an error if AUTOINSTALL_DEPENDENCY is defined and not AUTOINSTALL_VERSION. And vice versa.
-/* if (process.env.AUTOINSTALL_DEPENDENCY || process.env.AUTOINSTALL_VERSION) {
-  if (!process.env.AUTOINSTALL_DEPENDENCY) throw new Error('AUTOINSTALL_DEPENDENCY must be set in the environment if AUTOINSTALL_VERSION is set');
-  if (!process.env.AUTOINSTALL_VERSION) throw new Error('AUTOINSTALL_VERSION must be set in the environment if AUTOINSTALL_DEPENDENCY is set');
-} */
-
 //  Show a message in case of errors.
 process.on('uncaughtException', err => console.error('uncaughtException', err.message, err.stack));  //  Display uncaught exceptions.
 process.on('unhandledRejection', (reason, p) => console.error('unhandledRejection', reason, p));  //  Display uncaught promises.

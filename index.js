@@ -201,76 +201,6 @@ function createTraceID(now0) {
   return [`${s.substr(14, 2)}${s.substr(17, 2)}-${uuidv4()}`];
 }
 
-function publishJSON(req, topic, obj0) {
-  //  Publish the object as a JSON message to the PubSub topic.
-  //  Returns a promise.
-  try {
-    if (!topic || !obj0) return Promise.resolve('missing_topic_obj');
-    // eslint-disable-next-line no-param-reassign
-    if (obj0.type === null) delete obj0.type;
-    const obj = removeNulls(obj0);
-    console.log('publishJSON', topic.name, JSON.stringify(obj, null, 2));
-    const buf = new Buffer(stringify(obj));
-    const size = buf.length;
-    return topic.publisher().publish(buf)
-      .catch((error) => { // eslint-disable-next-line no-use-before-define
-        console.error('publishJSON', error.message, error.stack, topic.name, size, buf.toString());
-        return error;
-      });
-  } catch (error) {
-    console.error('publishJSON', error.message, error.stack);
-    return Promise.resolve('OK');
-  }
-}
-
-function logQueue(req, action, para0, logQueueConfig0) { /* eslint-disable global-require, no-param-reassign */
-  //  Write log to a PubSub queue for easier analysis.
-  //  If specified, logQueueConfig will override the default log queues.
-  //  TODO: Reuse the PubSub clients to write batches of records.
-  try {
-    if (module.exports.logQueueConfig.length === 0) return Promise.resolve('nothing');
-    const now = Date.now();
-    if (!req) req = {};
-    if (!para0) para0 = {};
-    if (!req.traceid) req.traceid = createTraceID(now);
-    //  Compute the duration in seconds with 1 decimal place.
-    if (req.starttime) para0.duration = parseInt((now - req.starttime) / 100, 10) / 10.0;
-    else req.starttime = now;
-    const starttime = req.starttime;
-    const traceid = req.traceid;
-
-    //  Extract the log fields.
-    let userid = null;
-    let companyid = null;
-    let token = null;
-    if (req.userid) userid = req.userid;
-    if (req.companyid) companyid = req.companyid;
-    if (req && req.get) token = req.get('Authorization') || req.get('token');
-    if (token && token.length >= 20) token = `${token.substr(0, 20)}...`;
-    const para = removeNulls(para0);
-
-    //  Write the log to pubsub queues.  Each config contains { projectId, topicName }
-    // eslint-disable-next-line no-unused-vars
-    const msg = { timestamp: now, starttime, traceid, userid, companyid, token, action, para }; // eslint-disable-next-line prefer-const
-    let promises = Promise.resolve('start');
-    const result = [];
-    const logQueueConfig = logQueueConfig0 || module.exports.logQueueConfig;
-    logQueueConfig.forEach((config) => {
-      const topic = cloud.getQueue(req, config.projectId, config.topicName);
-      promises = promises
-        .then(() => publishJSON(req, topic, msg))
-        //  Suppress any errors so logging can continue.
-        .catch(dumpError)
-        .then((res) => { result.push(res); });
-    });
-    return promises //  Suppress any errors.
-      .catch(dumpError)
-      .then(() => result);
-  } catch (err) {
-    return Promise.resolve(dumpError(err));
-  }
-} /* eslint-enable global-require, no-param-reassign */
-
 function writeLog(req, loggingLog0, flush) {
   //  Execute each log task one tick at a time, so it doesn't take too much resources.
   //  If flush is true, flush all logs without waiting for the tick, i.e. when quitting.
@@ -376,7 +306,8 @@ function deferLog(req, action, para0, record, now, operation, loggingLog0) { /* 
   try {
     //  Don't log any null values, causes Log errors.
     const para = removeNulls(para0 || {});
-    //  Log to PubSub for easier analysis.
+    //  Log to a queue for easier analysis.
+    //  eslint-disable-next-line no-use-before-define
     return logQueue(req, action, para)
       .catch(dumpError)
       .then(() => {
@@ -521,12 +452,103 @@ function log(req0, action, para0) {
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Messaging Functions: Dispatch messages between Cloud Functions via Google Cloud PubSub or AWS IoT MQTT Queues
 
+//  Custom routing function to remap the projectId and topicName to deliver to another queue.
+let customTransformRoute = null;
+
+//  logQueue will log to the queues according to this array of { projectId, topicName }
+let logQueueConfig = [];
+
+function setLogQueue(config) {
+  //  logQueue will log to the queues according to config, an array of { projectId, topicName }
+  logQueueConfig = config || [];
+}
+
+function setRoute(route) {
+  //  If required, set the routing function to remap the projectId and topicName to deliver to another queue.
+  customTransformRoute = route;
+}
+
+function transformRoute(req, type, device, projectId, topicName) {
+  //  If required, remap the projectId and topicName to deliver to another queue.
+  if (customTransformRoute) return customTransformRoute(req, type, device, projectId, topicName);
+  return { credentials: Object.assign({}, projectId), topicName };
+}
+
 function isProcessedMessage(/* req, message */) {
   //  Return true if this message is being or has been processed recently by this server
   //  or another server.  We check the central queue.  In case of error return false.
   //  Returns a promise.
   return Promise.resolve(false);  //  TODO
 }
+
+function publishJSON(req, topic, obj0) {
+  //  Publish the object as a JSON message to the PubSub topic.
+  //  Returns a promise.
+  try {
+    if (!topic || !obj0) return Promise.resolve('missing_topic_obj');
+    // eslint-disable-next-line no-param-reassign
+    if (obj0.type === null) delete obj0.type;
+    const obj = removeNulls(obj0);
+    console.log('publishJSON', topic.name, JSON.stringify(obj, null, 2));
+    const buf = new Buffer(stringify(obj));
+    const size = buf.length;
+    return topic.publisher().publish(buf)
+      .catch((error) => { // eslint-disable-next-line no-use-before-define
+        console.error('publishJSON', error.message, error.stack, topic.name, size, buf.toString());
+        return error;
+      });
+  } catch (error) {
+    console.error('publishJSON', error.message, error.stack);
+    return Promise.resolve('OK');
+  }
+}
+
+function logQueue(req, action, para0, logQueueConfig0) { /* eslint-disable global-require, no-param-reassign */
+  //  Write log to a PubSub queue for easier analysis.
+  //  If specified, logQueueConfig will override the default log queues.
+  //  TODO: Reuse the PubSub clients to write batches of records.
+  try {
+    if (logQueueConfig.length === 0) return Promise.resolve('nothing');
+    const now = Date.now();
+    if (!req) req = {};
+    if (!para0) para0 = {};
+    if (!req.traceid) req.traceid = createTraceID(now);
+    //  Compute the duration in seconds with 1 decimal place.
+    if (req.starttime) para0.duration = parseInt((now - req.starttime) / 100, 10) / 10.0;
+    else req.starttime = now;
+    const starttime = req.starttime;
+    const traceid = req.traceid;
+
+    //  Extract the log fields.
+    let userid = null;
+    let companyid = null;
+    let token = null;
+    if (req.userid) userid = req.userid;
+    if (req.companyid) companyid = req.companyid;
+    if (req && req.get) token = req.get('Authorization') || req.get('token');
+    if (token && token.length >= 20) token = `${token.substr(0, 20)}...`;
+    const para = removeNulls(para0);
+
+    //  Write the log to pubsub queues.  Each config contains { projectId, topicName }
+    // eslint-disable-next-line no-unused-vars
+    const msg = { timestamp: now, starttime, traceid, userid, companyid, token, action, para }; // eslint-disable-next-line prefer-const
+    let promises = Promise.resolve('start');
+    const result = [];
+    (logQueueConfig0 || logQueueConfig).forEach((config) => {
+      const topic = cloud.getQueue(req, config.projectId, config.topicName);
+      promises = promises
+        .then(() => publishJSON(req, topic, msg))
+        //  Suppress any errors so logging can continue.
+        .catch(dumpError)
+        .then((res) => { result.push(res); });
+    });
+    return promises //  Suppress any errors.
+      .catch(dumpError)
+      .then(() => result);
+  } catch (err) {
+    return Promise.resolve(dumpError(err));
+  }
+} /* eslint-enable global-require, no-param-reassign */
 
 function publishMessage(req, oldMessage, device, type) {
   //  Publish the message to the device or message type queue in PubSub.
@@ -542,10 +564,10 @@ function publishMessage(req, oldMessage, device, type) {
     : type
       ? `sigfox.types.${type}`
       : 'sigfox.received';
-  const res = module.exports.transformRoute(req, type, device, cloud.credentials, topicName0);
-  const credentials = res.credentials;
-  const projectId = (credentials && credentials.projectId)
-    ? credentials.projectId : null;
+  const projectId0 = (cloud.credentials && cloud.credentials.projectId)
+    ? cloud.credentials.projectId : null;
+  const res = transformRoute(req, type, device, projectId0, topicName0);
+  const projectId = res.projectId;
   const topicName = res.topicName;
   const topic = cloud.getQueue(req, projectId, topicName);
   log(req, 'publishMessage', { device: oldMessage.device, type, topic: topic ? topic.name : null });
@@ -575,7 +597,7 @@ function publishMessage(req, oldMessage, device, type) {
     delete metadata.body;
     message.metadata = metadata;
   }
-  const pid = credentials.projectId || '';
+  const pid = projectId || '';
   const destination = topicName;
   //  If you get an error here because the queue doesn't exist, it may be OK.
   //  sigfox.devices.all should always exist, but sigfox.devices.<<device>> and
@@ -774,7 +796,6 @@ module.exports = (cloud0) => {
     log,
     error: log,
     flushLog,
-    logQueue,
 
     //  Instrumentation
     dumpError,
@@ -784,9 +805,14 @@ module.exports = (cloud0) => {
 
     //  Messaging
     publishJSON,
+    logQueue,
     publishMessage,
     updateMessageHistory,
     dispatchMessage,
+
+    //  Config
+    setLogQueue,
+    setRoute,
 
     //  Device State: device state functions for AWS.  Not implemented for Google Cloud yet.
     createDevice: cloud.createDevice,
@@ -797,15 +823,6 @@ module.exports = (cloud0) => {
     init: cloud.init,
     main,
     endTask,
-
-    //  Optional Config - Log to PubSub: Specify array of { projectId, topicName }
-    logQueueConfig: [],
-    setLogQueue: (config) => { module.exports.logQueueConfig = config; },
-
-    //  If required, remap the projectId and topicName to deliver to another queue.
-    transformRoute: (req, type, device, credentials, topicName) =>
-      ({ credentials: Object.assign({}, credentials), topicName }),
-    setRoute: (route) => { module.exports.transformRoute = route; },
 
     //  For unit test only.
     getRootSpan,

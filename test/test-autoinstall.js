@@ -62,17 +62,13 @@ exports.main = isGoogleCloud ? require('sigfox-gcloud/main').getMainFunction(wra
 
 /* Expected Output:
 START RequestId:  Version: $LATEST
-2017-11-26T03:11:21.775Z		total 12
--rw-rw-r-- 1 sbx_user1064 482 5120 Nov 26 03:11 autoinstall.js
--rw-rw-r-- 1 sbx_user1064 482 103 Nov 26 03:11 package.json
+2017-11-27T10:30:30.871Z		total 12
+-rw-rw-r-- 1 sbx_user1060 486 6351 Nov 27 10:30 autoinstall.js
+-rw-rw-r-- 1 sbx_user1060 486 233 Nov 27 10:30 package.json
 
-2017-11-26T03:11:40.396Z		/tmp
-├─┬ dnscache@1.0.1
-│ ├── asap@2.0.6
-│ └─┬ lodash.clone@4.3.2
-│ └── lodash._baseclone@4.5.7
-├─┬ sigfox-aws@1.0.9
-│ ├─┬ aws-sdk@2.156.0
+2017-11-27T10:30:49.772Z		/tmp
+├─┬ sigfox-aws@2.0.2
+│ ├─┬ aws-sdk@2.157.0
 │ │ ├─┬ buffer@4.9.1
 │ │ │ ├── base64-js@1.2.1
 │ │ │ ├── ieee754@1.1.8
@@ -103,84 +99,71 @@ START RequestId:  Version: $LATEST
 │ │ ├── eyes@0.1.8
 │ │ ├── isstream@0.1.2
 │ │ └── stack-trace@0.0.10
-│ ├── dotenv@4.0.0
+│ └─┬ sigfox-iot-cloud@1.0.2
 │ └── json-stringify-safe@5.0.1
 └── uuid@3.1.0
 
 
-2017-11-26T03:11:40.415Z		npm
-2017-11-26T03:11:40.415Z		WARN tmp No description
+2017-11-27T10:30:49.813Z		total 20
+-rw-rw-r-- 1 sbx_user1060 486 6351 Nov 27 10:30 autoinstall.js
+drwxrwxr-x 38 sbx_user1060 486 4096 Nov 27 10:30 node_modules
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 npm-16-9cd3e1cb
+-rw-rw-r-- 1 sbx_user1060 486 233 Nov 27 10:30 package.json
 
-2017-11-26T03:11:40.415Z		npm
-2017-11-26T03:11:40.415Z		WARN
-2017-11-26T03:11:40.415Z		tmp No repository field.
+2017-11-27T10:30:49.849Z		total 156
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 async
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 async-listener
+drwxrwxr-x 9 sbx_user1060 486 4096 Nov 27 10:30 aws-sdk
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 aws-xray-sdk-core
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 base64-js
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 buffer
+drwxrwxr-x 7 sbx_user1060 486 4096 Nov 27 10:30 colors
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 continuation-local-storage
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 crypto-browserify
+drwxrwxr-x 2 sbx_user1060 486 4096 Nov 27 10:30 cycle
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 emitter-listener
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 events
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 eyes
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 ieee754
+drwxrwxr-x 2 sbx_user1060 486 4096 Nov 27 10:30 isarray
+drwxrwxr-x 2 sbx_user1060 486 4096 Nov 27 10:30 isstream
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 jmespath
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 json-stringify-safe
+drwxrwxr-x 3 sbx_user1060 486 20480 Nov 27 10:30 lodash
+drwxrwxr-x 5 sbx_user1060 486 4096 Nov 27 10:30 moment
+drwxrwxr-x 5 sbx_user1060 486 4096 Nov 27 10:30 pkginfo
+drwxrwxr-x 2 sbx_user1060 486 4096 Nov 27 10:30 punycode
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 querystring
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 sax
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 semver
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 shimmer
+drwxrwxr-x 7 sbx_user1060 486 4096 Nov 27 10:30 sigfox-aws
+drwxrwxr-x 6 sbx_user1060 486 4096 Nov 27 10:30 sigfox-iot-cloud
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 stack-trace
+drwxrwxr-x 2 sbx_user1060 486 4096 Nov 27 10:30 underscore
+drwxrwxr-x 2 sbx_user1060 486 4096 Nov 27 10:30 url
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 uuid
+drwxrwxr-x 4 sbx_user1060 486 4096 Nov 27 10:30 winston
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 xml2js
+drwxrwxr-x 3 sbx_user1060 486 4096 Nov 27 10:30 xmlbuilder
 
-2017-11-26T03:11:40.415Z		npm
-2017-11-26T03:11:40.416Z		WARN tmp No license field.
-
-2017-11-26T03:11:40.497Z		total 20
--rw-rw-r-- 1 sbx_user1064 482 5120 Nov 26 03:11 autoinstall.js
-drwxrwxr-x 42 sbx_user1064 482 4096 Nov 26 03:11 node_modules
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 npm-16-567280b0
--rw-rw-r-- 1 sbx_user1064 482 103 Nov 26 03:11 package.json
-
-2017-11-26T03:11:40.498Z		total 172
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 asap
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 async
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 async-listener
-drwxrwxr-x 9 sbx_user1064 482 4096 Nov 26 03:11 aws-sdk
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 aws-xray-sdk-core
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 base64-js
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 buffer
-drwxrwxr-x 7 sbx_user1064 482 4096 Nov 26 03:11 colors
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 continuation-local-storage
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 crypto-browserify
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 cycle
-drwxrwxr-x 5 sbx_user1064 482 4096 Nov 26 03:11 dnscache
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 dotenv
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 emitter-listener
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 events
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 eyes
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 ieee754
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 isarray
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 isstream
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 jmespath
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 json-stringify-safe
-drwxrwxr-x 3 sbx_user1064 482 20480 Nov 26 03:11 lodash
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 lodash._baseclone
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 lodash.clone
-drwxrwxr-x 5 sbx_user1064 482 4096 Nov 26 03:11 moment
-drwxrwxr-x 5 sbx_user1064 482 4096 Nov 26 03:11 pkginfo
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 punycode
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 querystring
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 sax
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 semver
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 shimmer
-drwxrwxr-x 8 sbx_user1064 482 4096 Nov 26 03:11 sigfox-aws
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 stack-trace
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 underscore
-drwxrwxr-x 2 sbx_user1064 482 4096 Nov 26 03:11 url
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 uuid
-drwxrwxr-x 4 sbx_user1064 482 4096 Nov 26 03:11 winston
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 xml2js
-drwxrwxr-x 3 sbx_user1064 482 4096 Nov 26 03:11 xmlbuilder
-
-2017-11-26T03:11:40.499Z		Creating /tmp/index.js
-2017-11-26T03:11:40.499Z		require /tmp/index.js
-2017-11-26T03:11:40.500Z		Calling handler in /tmp/index.js from /tmp/autoinstall.js...
-2017-11-26T03:11:40.500Z		Creating instance of wrap function... /tmp/autoinstall.js
-2017-11-26T03:11:40.778Z		AWS_XRAY_DAEMON_ADDRESS is set. Configured daemon address to 169.254.79.2:2000.
-2017-11-26T03:11:40.781Z		AWS_XRAY_CONTEXT_MISSING is set. Configured context missing strategy to LOG_ERROR.
-2017-11-26T03:11:40.834Z		Subsegment streaming threshold set to: 0
-2017-11-26T03:11:40.836Z		Using custom sampling rules source.
-2017-11-26T03:11:41.536Z		main { event: { key3: 'value3', key2: 'value2', key1: 'value1' },
+2017-11-27T10:30:49.850Z		Creating /tmp/index.js
+2017-11-27T10:30:49.850Z		require /tmp/index.js
+2017-11-27T10:30:49.851Z		Calling handler in /tmp/index.js from /tmp/autoinstall.js...
+2017-11-27T10:30:49.851Z		Creating instance of wrap function... /tmp/autoinstall.js
+2017-11-27T10:30:50.132Z		AWS_XRAY_DAEMON_ADDRESS is set. Configured daemon address to 169.254.79.2:2000.
+2017-11-27T10:30:50.135Z		AWS_XRAY_CONTEXT_MISSING is set. Configured context missing strategy to LOG_ERROR.
+2017-11-27T10:30:50.191Z		Subsegment streaming threshold set to: 0
+2017-11-27T10:30:50.193Z		Using custom sampling rules source.
+2017-11-27T10:30:50.951Z		{ wrapCount: 0 }
+2017-11-27T10:30:50.953Z		main { event: { key3: 'value3', key2: 'value2', key1: 'value1' },
 context:
 { callbackWaitsForEmptyEventLoop: [Getter/Setter],
 done: [Function: done],
 succeed: [Function: succeed],
 fail: [Function: fail],
 logGroupName: '/aws/lambda/testExec',
-logStreamName: '2017/11/26/[$LATEST]1737c4c280894369806c0e583ef72d40',
+logStreamName: '2017/11/27/[$LATEST]22c0cd388e224f2690ec15b3fad92aa5',
 functionName: 'testExec',
 memoryLimitInMB: '640',
 functionVersion: '$LATEST',
@@ -200,51 +183,51 @@ removeNulls: [Function: removeNulls],
 log: [Function: log],
 error: [Function: log],
 flushLog: [Function: flushLog],
-logQueue: [Function: logQueue],
 dumpError: [Function: dumpError],
 dumpNullError: [Function: dumpNullError],
 createTraceID: [Function: createTraceID],
 startRootSpan: [Function: startRootSpan],
 publishJSON: [Function: publishJSON],
+logQueue: [Function: logQueue],
 publishMessage: [Function: publishMessage],
 updateMessageHistory: [Function: updateMessageHistory],
 dispatchMessage: [Function: dispatchMessage],
+setLogQueue: [Function: setLogQueue],
+setRoute: [Function: setRoute],
 createDevice: [Function: createDevice],
 getDeviceState: [Function: getDeviceState],
 updateDeviceState: [Function: updateDeviceState],
 init: [Function: init],
 main: [Function: main],
 endTask: [Function: endTask],
-logQueueConfig: [],
-setLogQueue: [Function: setLogQueue],
-transformRoute: [Function: transformRoute],
-setRoute: [Function: setRoute],
 getRootSpan: [Function: getRootSpan],
 endRootSpan: [Function: endRootSpan],
-createChildSpan: [Function: createChildSpan] } }
+createChildSpan: [Function: createChildSpan] },
+uuid: { [Function: v4] v1: [Function: v1], v4: [Circular] } }
 END RequestId:
-REPORT RequestId: 	Duration: 20028.25 ms	Billed Duration: 20100 ms Memory Size: 640 MB	Max Memory Used: 234 MB
+REPORT RequestId: 	Duration: 20561.86 ms	Billed Duration: 20600 ms Memory Size: 640 MB	Max Memory Used: 231 MB
 */
 
 /* Subsequent Run:
-START RequestId:  Version: $LATEST
-2017-11-26T03:16:46.877Z		Reusing /tmp/index.js
-2017-11-26T03:16:46.877Z		require /tmp/index.js
-2017-11-26T03:16:46.877Z		Calling handler in /tmp/index.js from /tmp/autoinstall.js...
-2017-11-26T03:16:46.877Z		main { event: { key3: 'value3', key2: 'value2', key1: 'value1' },
+START RequestId: 763fab4a-d35e-11e7-837f-4109beff3ef1 Version: $LATEST
+2017-11-27T10:33:52.274Z	763fab4a-d35e-11e7-837f-4109beff3ef1	Reusing /tmp/index.js
+2017-11-27T10:33:52.274Z	763fab4a-d35e-11e7-837f-4109beff3ef1	require /tmp/index.js
+2017-11-27T10:33:52.274Z	763fab4a-d35e-11e7-837f-4109beff3ef1	Calling handler in /tmp/index.js from /tmp/autoinstall.js...
+2017-11-27T10:33:52.274Z	763fab4a-d35e-11e7-837f-4109beff3ef1	{ wrapCount: 1 }
+2017-11-27T10:33:52.274Z	763fab4a-d35e-11e7-837f-4109beff3ef1	main { event: { key3: 'value3', key2: 'value2', key1: 'value1' },
 context:
 { callbackWaitsForEmptyEventLoop: [Getter/Setter],
 done: [Function: done],
 succeed: [Function: succeed],
 fail: [Function: fail],
 logGroupName: '/aws/lambda/testExec',
-logStreamName: '2017/11/26/[$LATEST]1737c4c280894369806c0e583ef72d40',
+logStreamName: '2017/11/27/[$LATEST]22c0cd388e224f2690ec15b3fad92aa5',
 functionName: 'testExec',
 memoryLimitInMB: '640',
 functionVersion: '$LATEST',
 getRemainingTimeInMillis: [Function: getRemainingTimeInMillis],
-invokeid: '',
-awsRequestId: '',
+invokeid: '763fab4a-d35e-11e7-837f-4109beff3ef1',
+awsRequestId: '763fab4a-d35e-11e7-837f-4109beff3ef1',
 invokedFunctionArn: 'arn:aws:lambda:ap-southeast-1:112039193356:function:testExec',
 autoinstalled: true },
 callback: [Function: callback],
@@ -258,28 +241,27 @@ removeNulls: [Function: removeNulls],
 log: [Function: log],
 error: [Function: log],
 flushLog: [Function: flushLog],
-logQueue: [Function: logQueue],
 dumpError: [Function: dumpError],
 dumpNullError: [Function: dumpNullError],
 createTraceID: [Function: createTraceID],
 startRootSpan: [Function: startRootSpan],
 publishJSON: [Function: publishJSON],
+logQueue: [Function: logQueue],
 publishMessage: [Function: publishMessage],
 updateMessageHistory: [Function: updateMessageHistory],
 dispatchMessage: [Function: dispatchMessage],
+setLogQueue: [Function: setLogQueue],
+setRoute: [Function: setRoute],
 createDevice: [Function: createDevice],
 getDeviceState: [Function: getDeviceState],
 updateDeviceState: [Function: updateDeviceState],
 init: [Function: init],
 main: [Function: main],
 endTask: [Function: endTask],
-logQueueConfig: [],
-setLogQueue: [Function: setLogQueue],
-transformRoute: [Function: transformRoute],
-setRoute: [Function: setRoute],
 getRootSpan: [Function: getRootSpan],
 endRootSpan: [Function: endRootSpan],
-createChildSpan: [Function: createChildSpan] } }
-END RequestId:
-REPORT RequestId: 	Duration: 15.88 ms	Billed Duration: 100 ms Memory Size: 640 MB	Max Memory Used: 234 MB
+createChildSpan: [Function: createChildSpan] },
+uuid: { [Function: v4] v1: [Function: v1], v4: [Circular] } }
+END RequestId: 763fab4a-d35e-11e7-837f-4109beff3ef1
+REPORT RequestId: 763fab4a-d35e-11e7-837f-4109beff3ef1	Duration: 36.36 ms	Billed Duration: 100 ms Memory Size: 640 MB	Max Memory Used: 231 MB
 */

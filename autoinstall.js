@@ -38,6 +38,41 @@ function reloadLambda(event, context, callback) {
   throw new Error('Handler not found - should be named "handler" or "main"');
 }
 
+function addDependencies(package_json) {
+  //  Add necessary dependencies to package_json before installing.  Return the updated package_json.
+  //  If the package.json passed in doesn't contain "dependencies", wrap it as "dependencies".
+  let packageObj = package_json || {};
+  if (!packageObj.dependencies) packageObj = {dependencies: packageObj};
+  //  Include the right version of sigfox-aws.
+  const dependencies = [{dependency: sigfoxAWSDependency, version: sigfoxAWSVersion}];
+  if (process.env.AUTOINSTALL_DEPENDENCY) {
+    //  If environment contains AUTOINSTALL_DEPENDENCY, add that dependency too.
+    //  e.g. AUTOINSTALL_DEPENDENCY= sigfox-aws-data / AUTOINSTALL_VERSION= >=0.0.11
+    const dependency = process.env.AUTOINSTALL_DEPENDENCY.trim()
+    //  If dependency contains "/" like "sigfox-iot-cloud/sigfoxCallback", take the first part.
+      .split('/', 2)[0];
+    //  If version is missing, assume latest.
+    const version = (process.env.AUTOINSTALL_VERSION || 'latest').trim();
+    dependencies.push({ dependency, version });
+  }
+  //  Add the dependencies.
+  dependencies.forEach((dep) => {
+    console.log(`Added dependency ${dep.dependency} version ${dep.version}`);
+    packageObj.dependencies[dep.dependency] = dep.version;
+  });
+  //  Add description, repository, license if missing.  NPM will complain if missing.
+  packageObj = Object.assign({
+    description: '(missing)',
+    license: 'MIT',
+    repository: {
+      type: 'git',
+      url: 'git+https://github.com/UnaBiz/sigfox-iot-cloud.git',
+    },
+  }, packageObj);
+  //  Return the new package_json for installation.
+  return packageObj;
+}
+
 function installDependencies(package_json, event, context, callback, sourceCode) {
   //  Copy the specified source code to /tmp/index.js. Write package_json to /tmp/package.json.
   //  Then run "npm install" to install dependencies from package.json.
@@ -50,36 +85,11 @@ function installDependencies(package_json, event, context, callback, sourceCode)
     console.log('Reusing', installedSourceFilename);
     return reloadLambda(event, context, callback);
   }
-  //  If the package.json passed in doesn't contain "dependencies", wrap it as "dependencies".
-  let packageObj = package_json || {};
-  if (!packageObj.dependencies) packageObj = { dependencies: packageObj };
-  //  Include the right version of sigfox-aws.
-  let dependency = sigfoxAWSDependency;
-  let version = sigfoxAWSVersion;
-  if (process.env.AUTOINSTALL_DEPENDENCY) {
-    //  If environment contains AUTOINSTALL_DEPENDENCY and AUTOINSTALL_VERSION, use that in dependencies instead.
-    //  e.g. AUTOINSTALL_DEPENDENCY= sigfox-aws-data / AUTOINSTALL_VERSION= >=0.0.11
-    dependency = process.env.AUTOINSTALL_DEPENDENCY.trim();
-    //  If dependency contains "/" like "sigfox-iot-cloud/sigfoxCallback", take the first part.
-    dependency = dependency.split('/', 2)[0];
-    //  If version is missing, assume latest.
-    version = (process.env.AUTOINSTALL_VERSION || 'latest').trim();
-  }
-  console.log(`Added dependency ${dependency} version ${version}`);
-  packageObj.dependencies[dependency] = version;
-
-  //  Add description, repository, license if missing.  NPM will complain if missing.
-  packageObj = Object.assign({
-    description: '(missing)',
-    license: 'MIT',
-    repository: {
-      type: 'git',
-      url: 'git+https://github.com/UnaBiz/sigfox-iot-cloud.git',
-    },
-  }, packageObj);
+  //  Add the necessary dependencies before installing.
+  const packageObj = addDependencies(package_json);
   //  Write the provided package.json and call "npm install".
   fs.writeFileSync(installedPackageFilename, JSON.stringify(packageObj, null, 2));
-  const cmd = [
+  const cmd = [  //  This shell script will be executed in the Lambda shell.
     `export HOME=${tmp}`,
     `cd ${tmp}`,
     `echo "Before install - ${tmp}:"; ls -l`,

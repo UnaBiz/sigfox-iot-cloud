@@ -17,7 +17,6 @@
 const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 //  PASTE PACKAGE.JSON BELOW  //////////////////////////////////////////////////////////
 {
-  "dnscache": "^1.0.1",
   "uuid": "^3.1.0"
 }
 //  PASTE PACKAGE.JSON ABOVE  //////////////////////////////////////////////////////////
@@ -25,6 +24,7 @@ const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Declarations: Helper constants to detect if we are running on Google Cloud or AWS.
+//  Don't use any require() in this section because AutoInstall has not loaded our dependencies yet.
 const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE; // eslint-disable-next-line no-unused-vars
 const isAWS = !!process.env.AWS_LAMBDA_FUNCTION_NAME; // eslint-disable-next-line no-unused-vars
 const isProduction = (process.env.NODE_ENV === 'production');  //  True on production server.
@@ -32,11 +32,13 @@ const isProduction = (process.env.NODE_ENV === 'production');  //  True on produ
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Message Processing Code
 
-function wrap(scloud) {  //  scloud will be is either sigfox-gcloud or sigfox-aws, depending on platform.
+function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, depending on platform.
   //  Wrap the module into a function so that all we defer loading of dependencies,
   //  and ensure that cloud resources are properly disposed. For AWS, wrap() is called after
   //  all dependencies have been loaded.
   let wrapCount = 0; //  Count how many times the wrapper was reused.
+
+  //  List all require() here because AutoInstall has loaded our dependencies. Don't include sigfox-gcloud or sigfox-aws, they are added by AutoInstall.
   const uuid = require('uuid');
 
   function getResponse(req, device0, body /* , msg */) {

@@ -241,7 +241,7 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     //  This function is exposed as a HTTP request to handle callbacks from
     //  Sigfox Cloud.  The Sigfox message is contained in the request.body.
     //  Get the type from URL e.g. https://myproject.appspot.com?type=gps
-    console.log({ wrapCount }); wrapCount += 1;  //  Count how many times the wrapper was reused.
+    wrapCount += 1;  //  Count how many times the wrapper was reused.
     //  Google Cloud and AWS pass parameters differently.
     //  We send to the respective modules to decode.
     const para = scloud.init(para1, para2, para3);
@@ -274,7 +274,7 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
         : null;
     const oldMessage = { device, body, type, rootTraceId };
     let updatedMessage = oldMessage;
-    scloud.log(req, 'start', { device, body, event, rootTraceId });
+    scloud.log(req, 'start', { wrapCount, device, body, event, rootTraceId });
 
     //  Now we run the task to publish the message to the queues.
     //  Wait for the publish task to complete.

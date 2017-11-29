@@ -267,7 +267,7 @@ function flushLog(req) {
     .catch(dumpError);
 }
 
-function getMetadata(para, now, operation) {
+function getLogMetadata(para, now, operation) {
   //  Return the mandatory metadata for Cloud Logging.
   const level = para.err ? 'ERROR' : 'DEBUG';
   const timestamp = new Date(now);
@@ -337,7 +337,7 @@ function deferLog(req, action, para0, record, now, operation, loggingLog0) { /* 
         if (key.length < logKeyLength) key += '_'.repeat(logKeyLength - key.length);
         const event = {};
         event[key] = para;
-        const metadata = getMetadata(para, now, operation);
+        const metadata = getLogMetadata(para, now, operation);
         // console.log('deferLog2', key, JSON.stringify(event, null, 2), JSON.stringify(metadata, null, 2)); ////
         return loggingLog0.entry(metadata, event);
       })
@@ -708,7 +708,7 @@ function dispatchMessage(req, oldMessage, device) {
 }
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
-//  region Metadata Functions: Read metadata from Google Cloud Metadata store and environment variables.
+//  region Metadata Functions: Read function metadata from Google Cloud Metadata store and environment variables.
 
 function getEnvironment(/* req */) {
   //  Returns the environment keys and values as metadata: { key1: val1, key2: val2, ... }
@@ -724,22 +724,22 @@ function getEnvironment(/* req */) {
   return metadata;
 }
 
-function getMetadata(req, authClient) {
-  //  Returns a promise for metadata keys and values: { key1: val1, key2: val2, ... }
+function getFunctionMetadata(req, authClient) {
+  //  Returns a promise for function metadata keys and values: { key1: val1, key2: val2, ... }
   //  We get the cloud-specific metadata (e.g. Google Cloud Metadata Store) then
   //  merge with the environment variables.  Environment variables will override
   //  cloud-specific metadata.
   //  Get cloud metadata.
-  return cloud.getMetadata(req, authClient)
+  return cloud.getFunctionMetadata(req, authClient)
     .then((cloudMetadata) => {
       //  Merge the environment metadata with cloud metadata.  Environment overrides cloud.
       const envMetadata = getEnvironment(req);
       const result = Object.assign({}, cloudMetadata, envMetadata);
-      log(req, 'getMetadata', { result, cloudMetadata, envMetadata });
+      log(req, 'getFunctionMetadata', { result, cloudMetadata, envMetadata });
       return result;
     })
     .catch((error) => {
-      log(req, 'getMetadata', { error });
+      log(req, 'getFunctionMetadata', { error });
       throw error;
     });
 }
@@ -872,8 +872,8 @@ module.exports = (cloud0) => {
     setRoute,
 
     //  Metadata
-    authorizeMetadata: cloud.authorizeMetadata,
-    getMetadata,
+    authorizeFunctionMetadata: cloud.authorizeFunctionMetadata,
+    getFunctionMetadata,
 
     //  Device State: device state functions for AWS.  Not implemented for Google Cloud yet.
     createDevice: cloud.createDevice,

@@ -57,10 +57,10 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     let authClient = null;
     let metadata = null;
     //  Get authorisation to access the metadata.
-    return scloud.authorizeMetadata(req)
+    return scloud.authorizeFunctionMetadata(req)
       .then((res) => { authClient = res; })
       //  Get the project metadata.
-      .then(() => scloud.getMetadata(req, authClient))
+      .then(() => scloud.getFunctionMetadata(req, authClient))
       .then((res) => { metadata = res; })
       //  Return the default route from the metadata.
       .then(() => metadata[defaultRouteKey] || metadata[defaultRouteKey.toUpperCase()])

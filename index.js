@@ -1,7 +1,9 @@
+//  region Introduction
 //  sigfox-iot-cloud is a framework for building a Sigfox server, based on AWS or Google Cloud.
 //  Clients should not use this library directly, use sigfox-gcloud or sigfox-aws instead.
 /* eslint-disable camelcase, no-console, no-nested-ternary, global-require, import/no-unresolved, max-len */
 
+//  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Declarations
 //  Helper constants to detect if we are running on Google Cloud or AWS.
 //  const isGoogleCloud = !!process.env.FUNCTION_NAME || !!process.env.GAE_SERVICE;
@@ -743,7 +745,7 @@ function endTask(req) {
   ]);
 }
 
-function main(event, task) {
+function main(para1, para2, para3) {
   //  Start point for the Cloud Function, which is triggered by the delivery
   //  of a queue message. Decode the Sigfox message and perform the task specified
   //  by the caller to process the Sigfox message.  Then dispatch the next step of
@@ -756,7 +758,11 @@ function main(event, task) {
   //    timestamp: "2017-05-06T10:19:29.666Z"
   //    data: {…}  //  Base64 encoded Sigfox message
   //    eventId: "120816659675797" }
-  console.log('main', { event, task }); ////
+  //  Google Cloud and AWS pass parameters differently.
+  //  We send to the respective modules to decode.
+  const para = cloud.init(para1, para2, para3);
+  const event = para.event;
+  const task = para.task;
   const req = { starttime: Date.now(), event };  //  Record start time.
   //  Decode the base64 message.
   const message = event.body ? event  //  AWS

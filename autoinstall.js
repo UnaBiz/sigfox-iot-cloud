@@ -29,9 +29,9 @@ const exec = require('child_process').exec;
 
 function reloadLambda(event, context, callback) {
   //  Load the relocated Lambda Function at /tmp/index.js and call it.
-  console.log('require', installedSourceFilename);
+  console.log('AutoInstall require', installedSourceFilename);
   const installedModule = require(installedSourceFilename);
-  console.log(`Calling handler in ${installedSourceFilename} from ${__filename}...`);
+  console.log(`AutoInstall Calling handler in ${installedSourceFilename} from ${__filename}...`);
   //  Set a flag so we know that we have reloaded.
   //  eslint-disable-next-line no-param-reassign
   context.autoinstalled = true;
@@ -60,7 +60,7 @@ function addDependencies(package_json) {
   }
   //  Add the dependencies.
   dependencies.forEach((dep) => {
-    console.log(`Added dependency ${dep.dependency} version ${dep.version}`);
+    console.log(`AutoInstall Added dependency ${dep.dependency} version ${dep.version}`);
     packageObj.dependencies[dep.dependency] = dep.version;
   });
   //  Add description, repository, license if missing.  NPM will complain if missing.
@@ -85,7 +85,7 @@ function installDependencies(package_json, event, context, callback, sourceCode)
 
   //  If package.json and source code file both exist in /tmp, then assume already installed.
   if (fs.existsSync(installedPackageFilename) && fs.existsSync(installedSourceFilename)) {
-    console.log('Reusing', installedSourceFilename);
+    console.log('AutoInstall Reusing', installedSourceFilename);
     return reloadLambda(event, context, callback);
   }
   //  Add the necessary dependencies before installing.
@@ -105,7 +105,7 @@ function installDependencies(package_json, event, context, callback, sourceCode)
     //  NPM command failed.
     if (error) return callback(error, 'AutoInstall Failed');
     //  Write the source code file to indicate that we have succeeded.
-    console.log('Creating', installedSourceFilename);
+    console.log('AutoInstall Creating', installedSourceFilename);
     fs.writeFileSync(installedSourceFilename, sourceCode);
     //  Load the relocated source file at /tmp/index.js and call it.
     return reloadLambda(event, context, callback);

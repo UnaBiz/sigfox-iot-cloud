@@ -11,6 +11,7 @@
 //  Sample usage: https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/test/test-autoinstall.js
 
 const sigfoxAWSDependency = 'sigfox-aws';  //  Name of sigfox-aws dependency.
+const sigfoxAWSMain = `${sigfoxAWSDependency}/main`;
 const sigfoxAWSVersion = 'latest';  //  Version of sigfox-aws to include.
 const tmp = '/tmp';  //  Relocate code here.
 const sourceFilename = 'index.js';  //  Lambda source code will be written to this filename.
@@ -33,9 +34,8 @@ function reloadLambda(event, context, callback) {
   //  Set a flag so we know that we have reloaded.
   //  eslint-disable-next-line no-param-reassign
   context.autoinstalled = true;
-  if (installedModule.handler) return installedModule.handler(event, context, callback);
   if (installedModule.main) return installedModule.main(event, context, callback);
-  throw new Error('Handler not found - should be named "handler" or "main"');
+  throw new Error('Handler not found - should be named "main"');
 }
 
 function addDependencies(package_json) {
@@ -139,15 +139,10 @@ function installAndRunWrapper(event, context, callback, package_json, sourceFile
     //  Lambda function after relocating to /tmp/index.js.
     return installDependencies(package_json, event, context, callback, sourceCode);
   }
-  //  We have been reloaded with dependencies installed.
-  if (!wrapVar.main) {
-    //  If wrapper not created yet, create it with the wrap function.
-    console.log(`Creating instance of wrap function from ${__filename}...`); //  eslint-disable-next-line no-param-reassign
-    const scloud = require(sigfoxAWSDependency);
-    Object.assign(wrapVar, wrapFunc(scloud, package_json));
-  }
+  //  We have been reloaded with dependencies installed.  Get the main function.
+  const mainFunc = require(sigfoxAWSMain).getMainFunction(wrapVar, wrapFunc, package_json);
   //  Run the wrapper, setting "this" to the wrap instance.
-  return wrapVar.main.bind(wrapVar)(event, context, callback);
+  return mainFunc(event, context, callback);
 } /* eslint-enable no-param-reassign */
 
 module.exports = {

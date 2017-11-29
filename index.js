@@ -219,7 +219,7 @@ function writeLog(req, loggingLog0, flush) {
     if (batch.length >= size) break;
     if (logTasks.length === 0) break;
     const task = logTasks.shift();
-    if (!task) break;
+    if (!task) continue;
     //  Add the task to the batch.
     batch.push(task(cloud.getLogger()).catch(dumpNullError));
     taskCount += 1;
@@ -238,11 +238,7 @@ function writeLog(req, loggingLog0, flush) {
       return 'OK'; //
     })
     .then(() => {  //  If flushing, don't wait for the tick.
-      if (flush) {
-        //  Continue flushing till empty.
-        if (logTasks.length === 0) return 'OK';
-        return writeLog(req, cloud.getLogger(), flush).catch(dumpError);
-      }
+      if (flush) return 'OK';
       // eslint-disable-next-line no-use-before-define
       scheduleLog(req, cloud.getLogger());  //  Wait for next tick before writing.
       return 'OK';

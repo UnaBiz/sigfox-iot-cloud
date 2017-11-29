@@ -24,7 +24,7 @@ const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 //  region Declarations: Don't use any require() or process.env in this section because AutoInstall has not loaded our dependencies yet.
 
 //  A route is an array of strings.  Each string indicates the next processing step,
-//  e.g. ['decodeStructuredMessage', 'logToDatabase', ''logToUbidots'].
+//  e.g. ['decodeStructuredMessage', 'sendToDatabase', 'sendToUbidots'].
 //  The route is stored in this key in the Google Cloud Metadata store and AWS Lambda Environment Variable.
 const defaultRouteKey = 'sigfox-route';
 const routeExpiry = 10 * 1000;  //  Routes expire in 10 seconds. Reload routes after expiry.
@@ -63,12 +63,12 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
       .then(() => scloud.getMetadata(req, authClient))
       .then((res) => { metadata = res; })
       //  Return the default route from the metadata.
-      .then(() => metadata[defaultRouteKey])
+      .then(() => metadata[defaultRouteKey] || metadata[defaultRouteKey.toUpperCase()])
       .then((res) => {
         //  Cache for 10 seconds.
-        //  result looks like 'decodeStructuredMessage,logToDatabase'
-        //  Convert to ['decodeStructuredMessage', 'logToDatabase']
-        const result = res.split(' ').join('').split(',');  //  Remove spaces.
+        //  result looks like 'decodeStructuredMessage,sendToDatabase'
+        //  Convert to ['decodeStructuredMessage', 'sendToDatabase']
+        const result = (res || '').split(' ').join('').split(',');  //  Remove spaces.
         if (scloud.isAWS) {
           //  TODO: For AWS we start with sigfox.received and end with sigfox.devices.all.
           //  Last route for AWS is always "all".

@@ -8,8 +8,9 @@
 //  but it's easier to maintain and faster to prototype.  The first call
 //  is slower because it loads the dependencies, but subsequent calls will
 //  be faster because AWS reuses the dependencies until it spawns another Lambda instance.
-//  Sample usage: https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/test/test-autoinstall.js
+//  Standard template with sample usage: https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/test/test-autoinstall.js
 
+const sigfoxGCloudDependency = 'sigfox-gcloud';  //  Name of sigfox-gcloud dependency.
 const sigfoxAWSDependency = 'sigfox-aws';  //  Name of sigfox-aws dependency.
 const sigfoxAWSMain = `${sigfoxAWSDependency}/main`;
 const sigfoxAWSVersion = 'latest';  //  Version of sigfox-aws to include.
@@ -43,6 +44,8 @@ function addDependencies(package_json) {
   //  If the package.json passed in doesn't contain "dependencies", wrap it as "dependencies".
   let packageObj = package_json || {};
   if (!packageObj.dependencies) packageObj = { dependencies: packageObj };
+  //  Remove sigfox-gcloud if included.
+  if (packageObj.dependencies[sigfoxGCloudDependency]) delete packageObj.dependencies[sigfoxGCloudDependency];
   //  Include the right version of sigfox-aws.
   const dependencies = [{ dependency: sigfoxAWSDependency, version: sigfoxAWSVersion }];
   if (process.env.AUTOINSTALL_DEPENDENCY) {
@@ -106,7 +109,7 @@ function installDependencies(package_json, event, context, callback, sourceCode)
     //  Load the relocated source file at /tmp/index.js and call it.
     return reloadLambda(event, context, callback);
   });
-  // Log process stdout and stderr
+  //  Log stdout and stderr from the NPM command to show any errors.
   child.stdout.on('data', console.log);
   child.stderr.on('data', console.error);
   return null;

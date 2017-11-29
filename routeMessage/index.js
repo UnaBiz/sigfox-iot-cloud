@@ -72,6 +72,11 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
         //  result looks like 'decodeStructuredMessage,logToDatabase'
         //  Convert to ['decodeStructuredMessage', 'logToDatabase']
         const result = res.split(' ').join('').split(',');  //  Remove spaces.
+        if (scloud.isAWS) {
+          //  TODO: For AWS we start with sigfox.received and end with sigfox.devices.all.
+          //  Last route for AWS is always "all".
+          if (result.indexOf('all') < 0) result.push('all');
+        }
         defaultRoute = result;
         defaultRouteExpiry = Date.now() + routeExpiry;
         scloud.log(req, 'getRoute', { result, device: req.device });

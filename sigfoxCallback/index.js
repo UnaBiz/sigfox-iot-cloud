@@ -251,7 +251,9 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     const req = Object.assign({}, para.req, { starttime: Date.now() });  //  Record start time.
     //  Start a root-level span to trace the request across Cloud Functions.
     const rootTrace = scloud.startRootSpan(req).rootTrace;
+    console.log('rootTrace', rootTrace);
     const rootTraceId = rootTrace ? rootTrace.traceId : null;  //  Pass to other Cloud Functions.
+    console.log('rootTraceId', rootTraceId);
     req.rootTraceId = rootTraceId;
 
     const event = null;

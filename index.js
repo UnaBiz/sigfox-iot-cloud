@@ -756,6 +756,7 @@ function main(event, task) {
   //    timestamp: "2017-05-06T10:19:29.666Z"
   //    data: {…}  //  Base64 encoded Sigfox message
   //    eventId: "120816659675797" }
+  console.log('main', { event, task }); ////
   const req = { starttime: Date.now(), event };  //  Record start time.
   //  Decode the base64 message.
   const message = event.body ? event  //  AWS

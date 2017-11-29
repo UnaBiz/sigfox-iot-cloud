@@ -268,9 +268,6 @@ function scheduleLog(req, loggingLog0) {
 function flushLog(req) {
   //  We are about to quit.  Write all log items.
   return writeLog(req, null, true)
-    .catch(dumpError)
-    //  Tell the cloud to close any logging connections.
-    .then(() => cloud.shutdown(req))
     .catch(dumpError);
 }
 
@@ -763,6 +760,8 @@ function main(para1, para2, para3, para4) {
   const para = cloud.init(para1, para2, para3, para4);
   const event = para.event;
   const task = para.task;
+  let result = null;
+  let error = null;
   if (!task) throw new Error('Task function missing');
   if (typeof task !== 'function') throw new Error(`Task should be a function, not ${typeof task}: ${task}`);
   const req = { starttime: Date.now(), event };  //  Record start time.
@@ -788,13 +787,17 @@ function main(para1, para2, para3, para4) {
         ? log(req, 'skip', { result: message, isProcessed, device, body, event, message })
         //  Else wait for the task to complete then dispatch the next step.
         //  Suppress all errors else Google or AWS will retry the message.
-        : (runTask(req, event, task, device, body, message).catch(dumpError))
+        : (runTask(req, event, task, device, body, message)
+          .catch((err) => { error = err; dumpError(err); }))
     ))
+    .then((res) => { result = res; })
     //  Log the final result i.e. the dispatched message.
-    .then(result => log(req, 'result', { result, device, body, event, message }))
+    .then(() => log(req, 'result', { result, device, body, event, message }))
     //  Flush the log and wait for it to be completed.
     .then(() => endTask(req))
-    .catch(dumpError);
+    .catch(dumpError)
+    //  Tell the cloud to close any logging connections.  Call the AWS callback.
+    .then(() => cloud.shutdown(req, true, error, result));
 }
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion

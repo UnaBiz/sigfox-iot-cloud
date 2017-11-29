@@ -231,6 +231,8 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
       //  After this point, don't use scloud.log since the log has been flushed.
       .then(() => scloud.log(req, 'result', { result, device, body }))
       .then(() => scloud.endTask(req).catch(scloud.dumpError))
+      //  Tell the cloud to close any logging connections.  But don't call the AWS callback.
+      .then(() => scloud.shutdown(req, false, null, response))
       //  Return the response to Sigfox Cloud and terminate the Cloud Function.
       //  Sigfox needs HTTP code 204 to indicate downlink.
       .then(() => res.status(204).json(response).end())

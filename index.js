@@ -763,8 +763,10 @@ function main(para1, para2, para3, para4) {
   const para = cloud.init(para1, para2, para3, para4);
   const event = para.event;
   const task = para.task;
+  if (!task) throw new Error('Task function missing');
+  if (typeof task !== 'function') throw new Error(`Task should be a function, not ${typeof task}: ${task}`);
   const req = { starttime: Date.now(), event };  //  Record start time.
-  //  Decode the base64 message.
+  //  Decode the message.
   const message = event.body ? event  //  AWS
     : JSON.parse(Buffer.from(event.data.data, 'base64').toString());  //  Google Cloud
   const device = message ? message.device : null;

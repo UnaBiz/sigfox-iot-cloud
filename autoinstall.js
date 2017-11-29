@@ -42,9 +42,9 @@ function addDependencies(package_json) {
   //  Add necessary dependencies to package_json before installing.  Return the updated package_json.
   //  If the package.json passed in doesn't contain "dependencies", wrap it as "dependencies".
   let packageObj = package_json || {};
-  if (!packageObj.dependencies) packageObj = {dependencies: packageObj};
+  if (!packageObj.dependencies) packageObj = { dependencies: packageObj };
   //  Include the right version of sigfox-aws.
-  const dependencies = [{dependency: sigfoxAWSDependency, version: sigfoxAWSVersion}];
+  const dependencies = [{ dependency: sigfoxAWSDependency, version: sigfoxAWSVersion }];
   if (process.env.AUTOINSTALL_DEPENDENCY) {
     //  If environment contains AUTOINSTALL_DEPENDENCY, add that dependency too.
     //  e.g. AUTOINSTALL_DEPENDENCY= sigfox-aws-data / AUTOINSTALL_VERSION= >=0.0.11

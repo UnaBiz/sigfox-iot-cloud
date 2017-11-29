@@ -760,6 +760,8 @@ function runTask(req, event, task, device, body, message) {
     .then((result) => { updatedMessage = result; return result; })
     .catch(error => log(req, 'task', { error, device, body, event, message }))
     .then(() => dispatchMessage(req, updatedMessage, device))
+    //  Return the updated message as the result.
+    .then(() => updatedMessage)
     .catch((error) => { throw error; });
 }
 

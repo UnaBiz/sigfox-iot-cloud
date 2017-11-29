@@ -409,7 +409,12 @@ function log(req0, action, para0) {
     if (err) dumpError(err, action, para);
     if (err && isProduction) {
       try {
+        //  Report the error to the cloud.
         cloud.reportError(req, err, action, para);
+      } catch (err2) { dumpError(err2); }
+      try {
+        //  Flush all logs.
+        writeLog(req, null, true);
       } catch (err2) { dumpError(err2); }
     }
     const record = { timestamp: `${now}`, action };
@@ -740,9 +745,9 @@ function endTask(req) {
 
 function main(event, task) {
   //  Start point for the Cloud Function, which is triggered by the delivery
-  //  of a PubSub message. Decode the Sigfox message and perform the task specified
+  //  of a queue message. Decode the Sigfox message and perform the task specified
   //  by the caller to process the Sigfox message.  Then dispatch the next step of
-  //  the route in the message, set by routeMessage.
+  //  the route in the message, previously set by routeMessage.
   //  task should have the signature task(req, device, body, message).
   //  For AWS, event is the message itself.
   //  For Google Cloud, event contains

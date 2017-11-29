@@ -1,6 +1,6 @@
 {
   "name": "sigfox-iot-cloud",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Framework for building a Sigfox server, based on AWS or Google Cloud",
   "main": "index.js",
   "scripts": {

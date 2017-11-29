@@ -275,6 +275,7 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
       : req.query.device
         ? req.query.device.toUpperCase()
         : null;
+    Object.assign(req, { device });  //  For logging.
     const oldMessage = { device, body, type, rootTraceId };
     let updatedMessage = oldMessage;
     scloud.log(req, 'start', { wrapCount, device, body, event, rootTraceId });

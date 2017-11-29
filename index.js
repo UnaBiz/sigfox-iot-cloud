@@ -745,7 +745,7 @@ function endTask(req) {
   ]);
 }
 
-function main(para1, para2, para3) {
+function main(para1, para2, para3, para4) {
   //  Start point for the Cloud Function, which is triggered by the delivery
   //  of a queue message. Decode the Sigfox message and perform the task specified
   //  by the caller to process the Sigfox message.  Then dispatch the next step of
@@ -760,7 +760,7 @@ function main(para1, para2, para3) {
   //    eventId: "120816659675797" }
   //  Google Cloud and AWS pass parameters differently.
   //  We send to the respective modules to decode.
-  const para = cloud.init(para1, para2, para3);
+  const para = cloud.init(para1, para2, para3, para4);
   const event = para.event;
   const task = para.task;
   const req = { starttime: Date.now(), event };  //  Record start time.

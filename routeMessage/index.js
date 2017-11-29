@@ -109,7 +109,6 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
   function task(req, device, body, msg) {
     //  The task for this Cloud Function: Set the route for the Sigfox message.
     //  The route is saved into the "route" field of the Sigfox message.
-    console.log('task', { scloud }); //
     scloud.log(req, 'task', { device, body, msg, wrapCount }); wrapCount += 1;  //  Count how many times the wrapper was reused.
     return routeMessage(req, device, body, msg)
       .catch((error) => {

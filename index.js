@@ -884,6 +884,7 @@ module.exports = (cloud0) => {
 
     //  Startup
     init: cloud.init,
+    shutdown: cloud.shutdown,
     main,
     endTask,
 

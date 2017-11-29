@@ -247,9 +247,8 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     //  Google Cloud and AWS pass parameters differently.
     //  We send to the respective modules to decode.
     const para = scloud.init(para1, para2, para3);
-    const req = para.req;  //  HTTP Request Interface
-    // const res = para.res;  //  HTTP Response Interface
-    req.starttime = Date.now();
+    //  Get the HTTP Request Interface.
+    const req = Object.assign({}, para.req, { starttime: Date.now() });  //  Record start time.
     //  Start a root-level span to trace the request across Cloud Functions.
     const rootTrace = scloud.startRootSpan(req).rootTrace;
     const rootTraceId = rootTrace ? rootTrace.traceId : null;  //  Pass to other Cloud Functions.
@@ -261,10 +260,10 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
     const callbackTimestamp = Date.now();  //  Timestamp for callback.
     const datetime = new Date(callbackTimestamp)
       .toISOString().replace('T', ' ')
-      .substr(0, 19); //  For logging to Google Sheets.
+      .substr(0, 19); //  datetime contains UTC time in text.
     const localdatetime = new Date(callbackTimestamp + (8 * 60 * 60 * 1000))
       .toISOString().replace('T', ' ')
-      .substr(0, 19); //  For convenience in writing AWS IoT Rules.
+      .substr(0, 19); //  localdatetime contains localtime in text.
     //  Save the UUID, datetime and callback timestamp into the message.
     const body = Object.assign({ uuid: uuid0, datetime, localdatetime, callbackTimestamp },
       req.body);

@@ -712,6 +712,43 @@ function dispatchMessage(req, oldMessage, device) {
 }
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
+//  region Metadata Functions: Read metadata from Google Cloud Metadata store and environment variables.
+
+function getEnvironment(/* req */) {
+  //  Returns the environment keys and values as metadata: { key1: val1, key2: val2, ... }
+  //  On Google Cloud the keys can contain '-'.  But AWS environment doesn't allow.
+  //  So we copy all keys with '_' and change to '-' instead.
+  const metadata = Object.assign({}, process.env);
+  const keys = Object.keys(metadata);
+  for (const key of keys) {
+    if (key.indexOf('_') < 0) continue;
+    const val = metadata[key];
+    metadata[key.split('_').join('-')] = val;
+  }
+  return metadata;
+}
+
+function getMetadata(req, authClient) {
+  //  Returns a promise for metadata keys and values: { key1: val1, key2: val2, ... }
+  //  We get the cloud-specific metadata (e.g. Google Cloud Metadata Store) then
+  //  merge with the environment variables.  Environment variables will override
+  //  cloud-specific metadata.
+  //  Get cloud metadata.
+  return cloud.getMetadata(req, authClient)
+    .then((cloudMetadata) => {
+      //  Merge the environment metadata with cloud metadata.  Environment overrides cloud.
+      const envMetadata = getEnvironment(req);
+      const result = Object.assign({}, cloudMetadata, envMetadata);
+      log(req, 'getMetadata', { result, cloudMetadata, envMetadata });
+      return result;
+    })
+    .catch((error) => {
+      log(req, 'getMetadata', { error });
+      throw error;
+    });
+}
+
+//  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Main Function
 
 function runTask(req, event, task, device, body, message) {
@@ -837,6 +874,10 @@ module.exports = (cloud0) => {
     //  Config
     setLogQueue,
     setRoute,
+
+    //  Metadata
+    authorizeMetadata: cloud.authorizeMetadata,
+    getMetadata,
 
     //  Device State: device state functions for AWS.  Not implemented for Google Cloud yet.
     createDevice: cloud.createDevice,

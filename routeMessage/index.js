@@ -62,10 +62,8 @@ function wrap(scloud) {  //  scloud will be either sigfox-gcloud or sigfox-aws, 
       //  Get the project metadata.
       .then(() => scloud.getMetadata(req, authClient))
       .then((res) => { metadata = res; })
-      //  Convert the metadata to a JavaScript object.
-      .then(() => scloud.convertMetadata(req, metadata))
       //  Return the default route from the metadata.
-      .then(metadataObj => metadataObj[defaultRouteKey])
+      .then(() => metadata[defaultRouteKey])
       .then((res) => {
         //  Cache for 10 seconds.
         //  result looks like 'decodeStructuredMessage,logToDatabase'

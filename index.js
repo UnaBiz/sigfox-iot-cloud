@@ -773,9 +773,8 @@ function main(event, task) {
       isProcessed
         ? log(req, 'skip', { result: message, isProcessed, device, body, event, message })
         //  Else wait for the task to complete then dispatch the next step.
-        : runTask(req, event, task, device, body, message)
         //  Suppress all errors else Google or AWS will retry the message.
-          .catch(dumpError)
+        : (runTask(req, event, task, device, body, message).catch(dumpError))
     ))
     //  Log the final result i.e. the dispatched message.
     .then(result => log(req, 'result', { result, device, body, event, message }))

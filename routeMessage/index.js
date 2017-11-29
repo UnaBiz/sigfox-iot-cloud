@@ -25,10 +25,9 @@ const package_json = /* eslint-disable quote-props,quotes,comma-dangle,indent */
 
 //  A route is an array of strings.  Each string indicates the next processing step,
 //  e.g. ['decodeStructuredMessage', 'logToDatabase', ''logToUbidots'].
-
 //  The route is stored in this key in the Google Cloud Metadata store and AWS Lambda Environment Variable.
 const defaultRouteKey = 'sigfox-route';
-const routeExpiry = 10 * 1000;  //  Routes expire in 10 seconds.
+const routeExpiry = 10 * 1000;  //  Routes expire in 10 seconds. Reload routes after expiry.
 
 let defaultRoute = null;        //  The cached route.
 let defaultRouteExpiry = null;  //  Cache expiry timestamp.

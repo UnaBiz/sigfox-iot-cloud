@@ -1,3 +1,4 @@
+//  region Introduction
 //  Test to verify that AutoInstall can install dependencies and run a wrapper.
 //  For AWS: Copy the entire source code and paste into a Lambda function.
 //    Set Handler to "index.main".  Set Environment variable NODE_ENV to "production".

@@ -792,6 +792,7 @@ module.exports = (cloud0) => {
   //  Save the instance of sigfox-gcloud or sigfox-aws passed in. We expose the cloud-specific functions from the instance.
   if (cloud0) cloud = cloud0;
   return {
+    isProduction,
     isGoogleCloud: cloud.isGoogleCloud,
     isAWS: cloud.isAWS,
     projectId: cloud.projectId,

@@ -100,6 +100,7 @@ function installDependencies(package_json, event, context, callback, sourceCode)
     `echo "After install - ${tmp}:"; ls -l`,
     `echo "After install - ${tmp}/node_modules:"; ls -l node_modules`,
   ].join('; ');
+  console.log('AutoInstall started, installing dependencies...');
   const child = exec(cmd, { maxBuffer: 1024 * 500 }, (error) => {
     //  NPM command failed.
     if (error) return callback(error, 'AutoInstall Failed');

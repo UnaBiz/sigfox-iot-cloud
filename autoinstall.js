@@ -96,7 +96,7 @@ function installDependencies(package_json, event, context, callback, sourceCode)
     `export HOME=${tmp}`,
     `cd ${tmp}`,
     `echo "Before install - ${tmp}:"; ls -l`,
-    'npm install',
+    'npm install --only=prod',
     `echo "After install - ${tmp}:"; ls -l`,
     `echo "After install - ${tmp}/node_modules:"; ls -l node_modules`,
   ].join('; ');

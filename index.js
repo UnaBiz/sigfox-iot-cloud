@@ -128,7 +128,7 @@ function startRootSpan(req, rootTrace0) {
   return { rootTrace, rootSpan };
 }
 
-function getRootSpan(req, rootTraceId0) {
+function getRootSpan(req, rootTraceId0, traceSegment0) {
   //  Return the current root trace and span for tracing the request across Cloud Functions,
   //  based on the rootTraceId passed by the previous Cloud Function.  Return the
   //  cached copy from req if available. Returns 2 promises: { rootTracePromise, rootSpanPromise }
@@ -136,15 +136,16 @@ function getRootSpan(req, rootTraceId0) {
     //  We create the trace locally instead of calling tracing.getTrace because the trace
     //  may not be written to Google Cloud yet as we call another Cloud Function.
     const rootTraceId = rootTraceId0 || req.rootTraceId;
-    if (!rootTraceId) {
-      //  Missing trace ID.
-      if (process.env.SHOW_TRACE_ERRORS) dumpError(new Error('missing_traceid'));
+    const traceSegment = traceSegment0 || req.traceSegment;
+    if (!rootTraceId && !traceSegment) {
+      //  Missing trace ID and traceSegment.
+      if (process.env.SHOW_TRACE_ERRORS) dumpError(new Error('missing_traceid_tracesegment'));
       return {
         rootTracePromise: Promise.resolve(null),
         rootSpanPromise: Promise.resolve(null),
       };
     }
-    const rootTrace = cloud.createRootTrace(req, rootTraceId);
+    const rootTrace = cloud.createRootTrace(req, rootTraceId, traceSegment);
     //  Randomly assign the starting span ID.  Must not clash with previously assigned span ID
     //  for this trace ID.
     //  eslint-disable-next-line no-underscore-dangle
@@ -803,14 +804,15 @@ function main(para1, para2, para3, para4) {
   const device = message ? message.device : null;
   const body = message ? message.body : null;
   const rootTraceId = message.rootTraceId || null;
+  const traceSegment = message.traceSegment || null;
   req.uuid = body ? body.uuid : 'missing_uuid';
-  Object.assign(req, { device, body, rootTraceId });  //  For logging and instrumentation.
+  Object.assign(req, { device, body, rootTraceId, traceSegment });  //  For logging and instrumentation.
   if (message.isDispatched) delete message.isDispatched;
 
   //  Continue the root-level span (created in sigfoxCallback) to trace this request across Cloud Functions.
-  getRootSpan(req, rootTraceId);
+  getRootSpan(req, rootTraceId, traceSegment);
   //  Write the first log record in Cloud Logging as "start".
-  log(req, 'start', { device, body, event, message });
+  log(req, 'start', { device, body, event, message, traceSegment });
 
   //  If the message is already processed by another server, skip it.
   return isProcessedMessage(req, message)

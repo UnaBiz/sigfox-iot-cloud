@@ -231,11 +231,8 @@ function writeLog(req, loggingLog0, flush) {
       //  Write the non-null records.
       const entries = res.filter(x => (x !== null && x !== undefined));
       if (entries.length === 0) return 'nothing';
-      //  Rightfully for Google Cloud we should wait for this promise to complete, but it introduces a 1-second delay.
-      //  However we will deallocate the logger in shutdown() so it's OK.  No issue for AWS since we log to console.
-      cloud.getLogger().write(entries)  //  Async
+      return cloud.getLogger().write(entries)  //  Must wait or we will get writeLog errors in gcloud.
         .catch(error => console.error('writeLog', error.message, error.stack, JSON.stringify(entries, null, 2)));
-      return 'OK'; //
     })
     .then(() => {  //  If flushing, don't wait for the tick.
       if (flush) return 'OK';

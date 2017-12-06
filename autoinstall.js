@@ -123,6 +123,7 @@ function installAndRunWrapper(event, context, callback, package_json, sourceFile
   //  Then run "npm install" to install dependencies from package.json.
   //  Then reload /tmp/index.js, create an instance of the wrap()
   //  function, save into wrapVar and call wrap().main(event, context, callback)
+  if (!context.autoinstallStart) context.autoinstallStart = Date.now();
   let wrapFunc = wrapFunc0;
   if (!wrapFunc) {
     //  If wrap function is missing, set

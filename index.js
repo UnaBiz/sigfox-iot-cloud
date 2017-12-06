@@ -861,6 +861,11 @@ module.exports = (cloud0) => {
     createTraceID,
     startRootSpan,
 
+    //  File: File functions for AWS.  Not implemented for Google Cloud yet.
+    readFile: cloud.readFile,
+    writeFile: cloud.writeFile,
+    deleteFile: cloud.deleteFile,
+
     //  Messaging
     publishJSON,
     logQueue,

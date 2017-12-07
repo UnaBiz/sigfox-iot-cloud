@@ -860,6 +860,7 @@ module.exports = (cloud0) => {
     dumpNullError,
     createTraceID,
     startRootSpan,
+    sendTrace: cloud.sendTrace,  //  Only for AWS. Not implemented for Google Cloud yet.
 
     //  File: File functions for AWS.  Not implemented for Google Cloud yet.
     readFile: cloud.readFile,

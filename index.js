@@ -87,6 +87,14 @@ function dumpNullError(error, action, para) {
   return null;
 }
 
+function getQueryBody(req, key) {
+  //  Return the value of a parameter from query string or POST body.
+  //  Look for key in req.query then req.body.  Return the value mapped by the key.
+  return (req.query ? req.query[key] : null)
+    || (req.body ? req.body[key] : null)
+    || null;
+}
+
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Instrumentation Functions: Trace the execution of this Sigfox Callback across multiple Cloud Functions via Google Cloud Tracing or AWS X-Ray
 
@@ -849,6 +857,7 @@ module.exports = (cloud0) => {
     functionName: cloud.functionName,
     sleep,
     removeNulls,
+    getQueryBody,
 
     //  Logging
     log,

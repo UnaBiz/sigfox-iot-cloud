@@ -76,7 +76,7 @@ function removeNulls(obj, level) {
 function dumpError(error, action, para) {
   //  Dump the error to the console and suppress the error.  Return the error.
   //  Action and para are optional.
-  console.error(action || '', error.message, error.stack, stringify(para || '', null, 2));
+  console.error(action || '', error.message || error.err, error.stack, stringify(para || '', null, 2));
   return error;
 }
 
@@ -410,7 +410,8 @@ function log(req0, action, para0) {
     if (err) dumpError(err, action, para);
     if (err && isProduction) {
       try {
-        //  Report the error to the cloud.
+        //  Report the error to the cloud. Standardise the message field.
+        if (!err.message && err.err) err.message = stringify(err.err);
         cloud.reportError(req, err, action, para);
       } catch (err2) { dumpError(err2); }
       try {

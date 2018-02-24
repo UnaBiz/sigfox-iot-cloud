@@ -19,6 +19,7 @@ const uuidv4 = require('uuid/v4');
 const stringify = require('json-stringify-safe');
 
 const logKeyLength = process.env.LOGKEYLENGTH ? parseInt(process.env.LOGKEYLENGTH, 10) : 40;  //  Width of the left column in logs
+const maxSendLevels = process.env.MAXSENDLEVELS ? parseInt(process.env.MAXSENDLEVELS, 10) : 5;  //  How many levels to allow when logging or sending JSON objects. Default to 5 levels.
 
 //  //////////////////////////////////////////////////////////////////////////////////// endregion
 //  region Utility Functions
@@ -33,7 +34,7 @@ function sleep(req, res, millisec) {
 }
 
 function removeNulls(obj, level) {
-  //  Remove null values recursively before logging to Google Cloud.
+  //  Remove null values recursively before logging or sending to a message queue.
   //  We don't remove circular references because Google Cloud Logging
   //  removes circular references.  level should initially be null.
   if (obj === null || obj === undefined || typeof obj === 'function') {
@@ -43,7 +44,7 @@ function removeNulls(obj, level) {
   if (!Array.isArray(obj) && typeof obj !== 'object') {
     return obj;  // Valid scalar.
   }
-  if (level > 3) return '(truncated)';  //  Truncate at depth 3 to reduce log size.
+  if (level > maxSendLevels) return '(truncated)';  //  Truncate at this depth to reduce log size.
   const nextLevel = (level || 0) + 1;
   //  If obj is an array, clean each array item.
   if (Array.isArray(obj)) {
